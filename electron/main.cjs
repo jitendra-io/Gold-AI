@@ -109,3 +109,58 @@ function stopBackend() {
         execSync(`taskkill /pid ${backendProcess.pid} /T /F`);
       } else {
         backendProcess.kill('SIGTERM');
+      }
+    } catch {
+      // Ignored if process already exited
+    }
+    backendProcess = null;
+  }
+}
+
+function createWindow() {
+  const iconPath = path.join(__dirname, '../build/icon.ico');
+
+  mainWindow = new BrowserWindow({
+    title: 'GOLD AI',
+    width: 1280,
+    height: 840,
+    minWidth: 900,
+    minHeight: 600,
+    icon: fs.existsSync(iconPath) ? iconPath : undefined,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.cjs'),
+      nodeIntegration: false,
+      contextIsolation: true,
+    },
+    titleBarStyle: 'hidden',
+    titleBarOverlay: {
+      color: '#00050c',
+      symbolColor: '#00f3ff',
+      height: 38,
+    },
+    backgroundColor: '#0d0d0d',
+    autoHideMenuBar: true,
+    show: false
+  });
+
+  // Automatically approve webcam, microphone, and display media permissions
+  mainWindow.webContents.session.setPermissionCheckHandler((webContents, permission) => {
+    return ['media', 'mediaKeySystem', 'notifications', 'display-capture'].includes(permission);
+  });
+
+  mainWindow.webContents.session.setPermissionRequestHandler((webContents, permission, callback) => {
+    if (['media', 'mediaKeySystem', 'notifications', 'display-capture'].includes(permission)) {
+      return callback(true);
+    }
+    return callback(false);
+  });
+
+  // Enable DevTools shortcut (F12 or Ctrl+Shift+I) and Reload (F5 or Ctrl+R)
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.type === 'keyDown') {
+      if (input.key === 'F12' || (input.control && input.shift && input.key.toLowerCase() === 'i')) {
+        mainWindow.webContents.toggleDevTools();
+        event.preventDefault();
+      } else if (input.key === 'F5' || (input.control && input.key.toLowerCase() === 'r')) {
+        mainWindow.webContents.reload();
+        event.preventDefault();
