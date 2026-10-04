@@ -48,3 +48,33 @@ if appdata_dir:
 env_candidates = [
     os.path.join(appdata_dir, ".env") if appdata_dir else "",
     os.path.join(BASE_DIR, ".env"),
+    os.path.join(os.path.dirname(BASE_DIR), ".env"),
+    os.path.join(os.getcwd(), ".env")
+]
+loaded_env = False
+for ep in env_candidates:
+    if ep and os.path.exists(ep):
+        load_dotenv(ep)
+        loaded_env = True
+        # If loaded from bundle, also ensure copy in appdata for user persistence
+        if appdata_dir and ep != os.path.join(appdata_dir, ".env"):
+            try:
+                dest = os.path.join(appdata_dir, ".env")
+                if not os.path.exists(dest):
+                    shutil.copy(ep, dest)
+            except Exception:
+                pass
+        break
+if not loaded_env:
+    load_dotenv()
+
+# ── Init ────────────────────────────────────────────────────
+app = FastAPI()
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True,
+                   allow_methods=["*"], allow_headers=["*"])
+
+VOICE = "en-IN-PrabhatNeural"
+VOICE_RATE = "+15%"
+pygame.mixer.init()
+stop_tts_event = asyncio.Event()
+
