@@ -164,3 +164,59 @@ function createWindow() {
       } else if (input.key === 'F5' || (input.control && input.key.toLowerCase() === 'r')) {
         mainWindow.webContents.reload();
         event.preventDefault();
+      }
+    }
+  });
+
+  if (isDev) {
+    mainWindow.loadURL('http://localhost:5173');
+    mainWindow.webContents.openDevTools();
+  } else {
+    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+  }
+
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
+  });
+
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
+}
+
+app.on('ready', async () => {
+  await startBackend();
+  createWindow();
+});
+
+app.on('window-all-closed', () => {
+  stopBackend();
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
+});
+
+app.on('will-quit', () => {
+  stopBackend();
+});
+
+app.on('activate', () => {
+  if (mainWindow === null) {
+    createWindow();
+  }
+});
+
+// IPC communication
+ipcMain.handle('ping', () => 'pong');
+ipcMain.handle('open-external', async (event, url) => {
+  if (url && typeof url === 'string' && (url.startsWith('http://') || url.startsWith('https://'))) {
+    try {
+      await shell.openExternal(url);
+      return true;
+    } catch (err) {
+      console.error('shell.openExternal error:', err);
+      return false;
+    }
+  }
+  return false;
+});
