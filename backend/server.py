@@ -78,3 +78,43 @@ VOICE_RATE = "+15%"
 pygame.mixer.init()
 stop_tts_event = asyncio.Event()
 
+# Prime psutil CPU monitoring
+psutil.cpu_percent(interval=None)
+
+groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+gemini_client = google_genai.Client(api_key=os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY"))
+GROQ_MODEL = "qwen/qwen3.8-27b"
+GROQ_FALLBACKS = ["qwen/qwen3.8-27b", "openai/gpt-oss-120b", "openai/gpt-oss-20b"]
+GEMINI_MODEL = "gemini-2.5-flash"
+GEMINI_FALLBACKS = ["gemini-2.5-flash", "gemini-3.5-flash-lite", "gemini-3.8-flash"]
+
+def _call_gemini_vision(contents):
+    last_err = None
+    for model_name in GEMINI_FALLBACKS:
+        try:
+            resp = gemini_client.models.generate_content(
+                model=model_name,
+                contents=contents
+            )
+            if resp and resp.text:
+                return resp.text
+        except Exception as e:
+            last_err = e
+            print(f"Vision model {model_name} failed: {e}, attempting next fallback...")
+    raise last_err or RuntimeError("All Gemini vision models failed")
+
+# ── SQLite Memory (WAL Mode & Busy Timeout) ─────────────────
+DB_PATH = os.path.join(appdata_dir, "gold_memory.db") if appdata_dir else os.path.join(BASE_DIR, "gold_memory.db")
+if appdata_dir:
+    for old_name in ["wang_memory.db", "waaner_memory.db"]:
+        for parent_dir in [os.path.join(appdata, "Wang AI"), appdata_dir]:
+            old_db = os.path.join(parent_dir, old_name)
+            if os.path.exists(old_db) and not os.path.exists(DB_PATH):
+                try:
+                    shutil.copy(old_db, DB_PATH)
+                    break
+                except Exception:
+                    pass
+
+def get_db():
+    conn = sqlite3.connect(DB_PATH, timeout=10.0)
