@@ -118,3 +118,33 @@ if appdata_dir:
 
 def get_db():
     conn = sqlite3.connect(DB_PATH, timeout=10.0)
+    conn.execute("PRAGMA journal_mode=WAL;")
+    conn.execute("PRAGMA busy_timeout=5000;")
+    return conn
+
+def init_db():
+    with get_db() as conn:
+        c = conn.cursor()
+        c.execute('''CREATE TABLE IF NOT EXISTS chat_history
+                     (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                      role TEXT, content TEXT, timestamp TEXT)''')
+        c.execute('''CREATE TABLE IF NOT EXISTS notes
+                     (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                      content TEXT, timestamp TEXT)''')
+        conn.commit()
+
+def save_message(role: str, content: str):
+    normalized_role = "user" if role == "user" else "assistant"
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
+            c.execute("INSERT INTO chat_history (role, content, timestamp) VALUES (?, ?, ?)",
+                      (normalized_role, content, datetime.now().isoformat()))
+            conn.commit()
+    except Exception as e:
+        print(f"Error saving message: {e}")
+
+def load_recent_history(limit=30):
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
