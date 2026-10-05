@@ -298,3 +298,23 @@ APP_MAP = {
     "vs code": "code", "vscode": "code", "visual studio code": "code",
     "vlc": "vlc.exe",
     "snipping tool": "snippingtool.exe",
+    "settings": "ms-settings:",
+    "control panel": "control.exe",
+}
+
+WEB_SERVICES = {
+    "youtube": "https://www.youtube.com",
+    "google": "https://www.google.com",
+    "gmail": "https://mail.google.com",
+    "github": "https://www.github.com",
+    "netflix": "https://www.netflix.com",
+    "instagram": "https://www.instagram.com",
+    "twitter": "https://www.twitter.com",
+    "x": "https://www.x.com",
+    "chatgpt": "https://chatgpt.com",
+    "maps": "https://maps.google.com",
+}
+
+# ── TTS (Edge TTS + WebSocket Browser Streaming) ─────────────
+tts_lock = asyncio.Lock()
+
