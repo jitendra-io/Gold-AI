@@ -488,3 +488,23 @@ def _do_analyze_screen(cap_path: str) -> str:
                 print(f"PIL ImageGrab also failed: {pil_err}")
 
     finally:
+        _detach_input_desktop(hdesk)
+
+    if not captured:
+        raise RuntimeError("Your desktop display is currently locked or in sleep mode. Please wake up your display or use the Screen Share button in the browser.")
+
+    with open(cap_path, "rb") as f:
+        img_bytes = f.read()
+
+    return _call_gemini_vision([
+        "Describe what you see on this computer screen in 2 concise sentences, as if you are telling a friend.",
+        google_genai.types.Part.from_bytes(data=img_bytes, mime_type="image/png")
+    ])
+
+async def analyze_screen() -> str:
+    cap_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"screen_{uuid.uuid4().hex[:6]}.png")
+    try:
+        loop = asyncio.get_running_loop()
+        res = await loop.run_in_executor(None, _do_analyze_screen, cap_path)
+        return res
+    except Exception as e:
