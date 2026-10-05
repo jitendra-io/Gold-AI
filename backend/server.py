@@ -218,3 +218,23 @@ GROQ_TOOLS = [
             "parameters": {
                 "type": "object",
                 "properties": {
+                    "query": {"type": "string", "description": "The search keywords or query"}
+                },
+                "required": ["query"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_youtube",
+            "description": "Search YouTube for videos, music, songs, or tutorials and open the search results in the browser",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "The song title, video title, topic, or search term on YouTube"}
+                },
+                "required": ["query"]
+            }
+        }
+    },
