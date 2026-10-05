@@ -448,3 +448,23 @@ def _attach_input_desktop():
             user32.SetThreadDesktop(hdesk)
             return hdesk
     except Exception as e:
+        print(f"SetThreadDesktop notice: {e}")
+    return None
+
+def _detach_input_desktop(hdesk):
+    if hdesk:
+        try:
+            import ctypes
+            ctypes.windll.user32.CloseDesktop(hdesk)
+        except Exception:
+            pass
+
+def _do_analyze_screen(cap_path: str) -> str:
+    hdesk = _attach_input_desktop()
+    captured = False
+    
+    try:
+        # Attempt 1: MSS
+        try:
+            with mss.MSS() as sct:
+                monitor = sct.monitors[1] if len(sct.monitors) > 1 else sct.monitors[0]
