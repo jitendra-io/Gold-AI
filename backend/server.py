@@ -698,3 +698,23 @@ def _call_groq(messages, tools=None):
                 "temperature": 0.7,
                 "max_tokens": 512,
             }
+            if tools:
+                params["tools"] = tools
+                params["tool_choice"] = "auto"
+            return groq_client.chat.completions.create(**params)
+        except Exception as e:
+            last_err = e
+            print(f"Groq model {model_name} failed: {e}, attempting next fallback...")
+    raise last_err or RuntimeError("All Groq models failed")
+
+async def get_ai_response(user_input: str, websocket: WebSocket) -> str:
+    save_message("user", user_input)
+
+    # 1. Check direct intent first (zero-latency instant execution)
+    direct = check_direct_intent(user_input)
+    if direct:
+        if direct["type"] == "open_url":
+            url = direct["url"]
+            open_url_safely(url)
+            if websocket:
+                try:
