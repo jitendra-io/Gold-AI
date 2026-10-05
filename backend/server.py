@@ -398,3 +398,33 @@ def get_system_stats():
         temps = psutil.sensors_temperatures()
         if temps:
             for entries in temps.values():
+                if entries:
+                    cpu_temp = round(entries[0].current, 1)
+                    break
+    except Exception:
+        pass
+
+    battery_pct = None
+    power_plugged = None
+    try:
+        bat = psutil.sensors_battery()
+        if bat:
+            battery_pct = round(bat.percent, 1)
+            power_plugged = bat.power_plugged
+    except Exception:
+        pass
+
+    return {
+        "type": "stats",
+        "cpu_pct": round(cpu, 1),
+        "ram_pct": round(ram.percent, 1),
+        "ram_used_gb": round(ram.used / (1024**3), 1),
+        "ram_total_gb": round(ram.total / (1024**3), 1),
+        "disk_pct": disk_pct,
+        "cpu_temp": cpu_temp,
+        "battery_pct": battery_pct,
+        "power_plugged": power_plugged,
+        "net_sent_mb": round(net.bytes_sent / (1024**2), 1),
+        "net_recv_mb": round(net.bytes_recv / (1024**2), 1),
+    }
+
