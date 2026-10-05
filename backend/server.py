@@ -508,3 +508,23 @@ async def analyze_screen() -> str:
         res = await loop.run_in_executor(None, _do_analyze_screen, cap_path)
         return res
     except Exception as e:
+        msg = str(e)
+        if "BitBlt" in msg or "locked" in msg or "grab failed" in msg:
+            return "I couldn't capture your desktop right now because your screen is asleep or locked. In your browser, you can also use the 🖥️ Screen Share button to select and analyze any window!"
+        print(f"Screen analysis error: {e}")
+        return "I had trouble reading the screen display. Please try using the Screen Share button or wake up your display."
+    finally:
+        if os.path.exists(cap_path):
+            try:
+                os.remove(cap_path)
+            except Exception:
+                pass
+
+def _do_analyze_webcam_frame(image_bytes: bytes) -> str:
+    return _call_gemini_vision([
+        "Describe what you see from this user's webcam feed. Be friendly, observant, and concise in 2-3 spoken sentences.",
+        google_genai.types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")
+    ])
+
+async def analyze_webcam_frame(image_bytes: bytes) -> str:
+    try:
