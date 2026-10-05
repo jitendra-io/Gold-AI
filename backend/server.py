@@ -648,3 +648,23 @@ def check_direct_intent(user_input: str):
     # 3. Google / Internet Search patterns
     google_patterns = [
         r'^(?:search\s+(?:the\s+)?internet\s+for\s+)(.+)$',
+        r'^(?:search\s+(?:the\s+)?web\s+for\s+)(.+)$',
+        r'^(?:search\s+google\s+for\s+)(.+)$',
+        r'^(?:search\s+online\s+for\s+)(.+)$',
+        r'^(?:search\s+for\s+)(.+?)(?:\s+(?:on|in)\s+google|\s+online|\s+on\s+the\s+internet)?$',
+        r'^(?:google\s+search\s+)(.+)$',
+        r'^(?:google\s+)(.+)$',
+        r'^(?:search\s+)(.+)$'
+    ]
+    for pat in google_patterns:
+        m = re.match(pat, low)
+        if m:
+            q = m.group(1).strip()
+            if q and q not in ["internet", "google", "web"]:
+                url = f"https://www.google.com/search?q={urllib.parse.quote_plus(q)}"
+                return {
+                    "type": "open_url",
+                    "url": url,
+                    "reply": f"Searching Google for {q}."
+                }
+
