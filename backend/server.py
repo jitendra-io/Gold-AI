@@ -868,3 +868,33 @@ async def save_note_endpoint(payload: dict):
         return {"status": "success"}
     return {"status": "empty"}
 
+@app.delete("/notes")
+def clear_notes():
+    with get_db() as conn:
+        c = conn.cursor()
+        c.execute("DELETE FROM notes")
+        conn.commit()
+    return {"status": "success"}
+
+@app.get("/settings")
+def get_settings():
+    return {
+        "voice": VOICE,
+        "voice_rate": VOICE_RATE,
+        "groq_model": GROQ_MODEL,
+        "gemini_model": GEMINI_MODEL
+    }
+
+@app.post("/settings")
+def update_settings(payload: dict):
+    global VOICE, VOICE_RATE
+    if "voice" in payload and payload["voice"]:
+        VOICE = payload["voice"]
+    if "voice_rate" in payload and payload["voice_rate"]:
+        VOICE_RATE = payload["voice_rate"]
+    return {"status": "success", "voice": VOICE, "voice_rate": VOICE_RATE}
+
+@app.post("/clear-history")
+def clear_history():
+    with get_db() as conn:
+        c = conn.cursor()
