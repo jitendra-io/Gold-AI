@@ -378,3 +378,23 @@ async def play_and_stream_audio(text: str, websocket: WebSocket = None):
                 except Exception:
                     pass
 
+# ── Non-Blocking System Stats ────────────────────────────────
+def get_system_stats():
+    cpu = psutil.cpu_percent(interval=None)
+    ram = psutil.virtual_memory()
+    
+    disk_pct = 0
+    try:
+        root_path = os.path.abspath(os.sep)
+        disk = psutil.disk_usage(root_path)
+        disk_pct = round(disk.percent, 1)
+    except Exception:
+        pass
+
+    net = psutil.net_io_counters()
+
+    cpu_temp = 0
+    try:
+        temps = psutil.sensors_temperatures()
+        if temps:
+            for entries in temps.values():
