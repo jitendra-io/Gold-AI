@@ -588,3 +588,23 @@ def execute_open_app(name: str) -> str:
             url = target if target.startswith("http") else f"https://{target}"
             open_url_safely(url)
             return f"Opened {name} in your browser."
+        safe_name = re.sub(r'[^a-zA-Z0-9_\-\.]', '', target)
+        if safe_name and (shutil.which(safe_name) or shutil.which(f"{safe_name}.exe")):
+            try:
+                subprocess.Popen([safe_name], shell=False)
+                return f"Launched {safe_name}."
+            except Exception:
+                pass
+        url = f"https://www.google.com/search?q={urllib.parse.quote_plus(name)}"
+        open_url_safely(url)
+        return f"Searched for {name} online."
+
+def execute_whatsapp(contact: str, message: str) -> str:
+    wa_url = f"https://web.whatsapp.com/send?phone={contact}&text={urllib.parse.quote_plus(message)}"
+    open_url_safely(wa_url)
+    return f"Opened WhatsApp message for {contact}."
+
+# ── Direct Intent Recognition (Instant 0ms Execution) ────────
+def check_direct_intent(user_input: str):
+    text = user_input.strip()
+    low = text.lower().strip()
