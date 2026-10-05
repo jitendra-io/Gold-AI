@@ -258,3 +258,23 @@ GROQ_TOOLS = [
                 "type": "object",
                 "properties": {
                     "content": {"type": "string", "description": "The note text to save"}
+                },
+                "required": ["content"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "send_whatsapp",
+            "description": "Prepare a WhatsApp message to a contact or phone number",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "contact": {"type": "string", "description": "Phone number or contact name"},
+                    "message": {"type": "string", "description": "Message text"}
+                },
+                "required": ["contact", "message"]
+            }
+        }
+    }
