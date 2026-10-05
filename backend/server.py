@@ -548,3 +548,23 @@ def open_url_safely(url: str):
             os.startfile(url)
             opened = True
         except Exception as e2:
+            print(f"os.startfile error: {e2}")
+    return opened
+
+def execute_search_youtube(query: str) -> str:
+    encoded = urllib.parse.quote_plus(query.strip())
+    url = f"https://www.youtube.com/results?search_query={encoded}"
+    open_url_safely(url)
+    return f"Searched YouTube for '{query}'."
+
+def execute_search(query: str) -> str:
+    encoded = urllib.parse.quote_plus(query.strip())
+    url = f"https://www.google.com/search?q={encoded}"
+    open_url_safely(url)
+    return f"Searched Google for '{query}'."
+
+def execute_open_app(name: str) -> str:
+    target = name.lower().strip()
+    if target in WEB_SERVICES:
+        url = WEB_SERVICES[target]
+        open_url_safely(url)
