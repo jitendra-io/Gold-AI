@@ -338,3 +338,23 @@ async def play_and_stream_audio(text: str, websocket: WebSocket = None):
 
             # Read audio file into base64 to stream directly to browser
             audio_streamed_to_client = False
+            if os.path.exists(audio_file):
+                with open(audio_file, "rb") as af:
+                    b64_audio = base64.b64encode(af.read()).decode("utf-8")
+                if websocket:
+                    try:
+                        await websocket.send_json({"type": "tts_audio", "audio": b64_audio})
+                        audio_streamed_to_client = True
+                    except Exception:
+                        pass
+
+            # Play via host pygame ONLY if not streamed to a browser client
+            # (Prevents severe double audio / echo and avoids STT loopback)
+            if not audio_streamed_to_client:
+                try:
+                    pygame.mixer.music.load(audio_file)
+                    pygame.mixer.music.play()
+                    while pygame.mixer.music.get_busy():
+                        if stop_tts_event.is_set():
+                            pygame.mixer.music.stop()
+                            break
