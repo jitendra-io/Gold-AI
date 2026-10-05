@@ -738,3 +738,23 @@ async def get_ai_response(user_input: str, websocket: WebSocket) -> str:
         completion = None
         try:
             completion = await loop.run_in_executor(None, _call_groq, messages, GROQ_TOOLS)
+        except Exception as groq_err:
+            print(f"All Groq models failed: {groq_err}. Falling back to Gemini chat...")
+            # Fallback to Gemini 2.5
+            gem_res = await loop.run_in_executor(
+                None, 
+                lambda: gemini_client.models.generate_content(model=GEMINI_MODEL, contents=user_input)
+            )
+            reply = gem_res.text if gem_res and gem_res.text else "I am here. How can I help you?"
+            save_message("assistant", reply)
+            return reply
+
+        choice = completion.choices[0].message
+        
+        # Check if the model called structured tools
+        if choice.tool_calls:
+            assistant_text = choice.content or ""
+            extra_info = []
+
+            for tool_call in choice.tool_calls:
+                fn_name = tool_call.function.name
