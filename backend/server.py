@@ -778,3 +778,33 @@ async def get_ai_response(user_input: str, websocket: WebSocket) -> str:
                         try:
                             url = f"https://www.google.com/search?q={urllib.parse.quote_plus(q.strip())}"
                             await websocket.send_json({"type": "open_url", "url": url})
+                        except Exception:
+                            pass
+                elif fn_name == "search_youtube":
+                    q = fn_args.get("query", "")
+                    res = execute_search_youtube(q)
+                    extra_info.append(res)
+                    if websocket:
+                        try:
+                            url = f"https://www.youtube.com/results?search_query={urllib.parse.quote_plus(q.strip())}"
+                            await websocket.send_json({"type": "open_url", "url": url})
+                        except Exception:
+                            pass
+                elif fn_name == "take_screenshot":
+                    await websocket.send_json({"type": "status", "content": "📷 Capturing screen..."})
+                    analysis = await analyze_screen()
+                    extra_info.append(analysis)
+                elif fn_name == "save_note":
+                    note_text = fn_args.get("content", "")
+                    save_note(note_text)
+                    await websocket.send_json({"type": "note_saved", "content": note_text})
+                    extra_info.append(f"Saved note: {note_text}")
+                elif fn_name == "send_whatsapp":
+                    res = execute_whatsapp(fn_args.get("contact", ""), fn_args.get("message", ""))
+                    extra_info.append(res)
+
+            combined_reply = (assistant_text + " " + " ".join(extra_info)).strip()
+            if not combined_reply:
+                combined_reply = "Done!"
+            save_message("assistant", combined_reply)
+            return combined_reply
