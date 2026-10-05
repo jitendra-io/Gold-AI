@@ -468,3 +468,23 @@ def _do_analyze_screen(cap_path: str) -> str:
         try:
             with mss.MSS() as sct:
                 monitor = sct.monitors[1] if len(sct.monitors) > 1 else sct.monitors[0]
+                screenshot = sct.grab(monitor)
+                img = Image.frombytes("RGB", screenshot.size, screenshot.bgra, "raw", "BGRX")
+                img = img.resize((1280, 720), Image.LANCZOS)
+                img.save(cap_path)
+                captured = True
+        except Exception as mss_err:
+            print(f"MSS grab failed: {mss_err}, trying PIL ImageGrab...")
+
+        # Attempt 2: PIL ImageGrab fallback
+        if not captured:
+            try:
+                from PIL import ImageGrab
+                img = ImageGrab.grab()
+                img = img.resize((1280, 720), Image.LANCZOS)
+                img.save(cap_path)
+                captured = True
+            except Exception as pil_err:
+                print(f"PIL ImageGrab also failed: {pil_err}")
+
+    finally:
