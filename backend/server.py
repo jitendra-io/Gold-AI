@@ -148,3 +148,33 @@ def load_recent_history(limit=30):
     try:
         with get_db() as conn:
             c = conn.cursor()
+            c.execute("SELECT role, content FROM chat_history ORDER BY id DESC LIMIT ?", (limit,))
+            rows = c.fetchall()
+            role_map = {"user": "user", "assistant": "assistant", "ai": "assistant"}
+            return [{"role": role_map.get(r[0], "assistant"), "content": r[1]} for r in reversed(rows)]
+    except Exception as e:
+        print(f"Error loading history: {e}")
+        return []
+
+def save_note(content: str):
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
+            c.execute("INSERT INTO notes (content, timestamp) VALUES (?, ?)",
+                      (content, datetime.now().isoformat()))
+            conn.commit()
+    except Exception as e:
+        print(f"Error saving note: {e}")
+
+def get_notes():
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
+            c.execute("SELECT content, timestamp FROM notes ORDER BY id DESC LIMIT 50")
+            rows = c.fetchall()
+            return rows
+    except Exception as e:
+        print(f"Error getting notes: {e}")
+        return []
+
+init_db()
