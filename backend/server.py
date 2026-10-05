@@ -528,3 +528,23 @@ def _do_analyze_webcam_frame(image_bytes: bytes) -> str:
 
 async def analyze_webcam_frame(image_bytes: bytes) -> str:
     try:
+        loop = asyncio.get_running_loop()
+        res = await loop.run_in_executor(None, _do_analyze_webcam_frame, image_bytes)
+        return res
+    except Exception as e:
+        print(f"Webcam analysis error: {e}")
+        return "I couldn't clearly see the camera view right now. Please make sure your camera is active and well lit, and try scanning again."
+
+# ── Safe Tool Execution Logic ────────────────────────────────
+def open_url_safely(url: str):
+    """Open URL in user's default browser on Windows with robust fallback."""
+    opened = False
+    try:
+        opened = webbrowser.open(url)
+    except Exception as e:
+        print(f"webbrowser.open error: {e}")
+    if not opened:
+        try:
+            os.startfile(url)
+            opened = True
+        except Exception as e2:
