@@ -838,3 +838,33 @@ async def get_ai_response(user_input: str, websocket: WebSocket) -> str:
             text = (text + " " + " ".join(extra_messages)).strip()
         if not text:
             text = "Done!"
+        save_message("assistant", text)
+        return text
+
+    except Exception as e:
+        print(f"Error in get_ai_response: {e}")
+        fallback = "I had a momentary glitch processing that. How can I help you?"
+        save_message("assistant", fallback)
+        return fallback
+
+# ── REST Endpoints ────────────────────────────────────────────
+@app.get("/")
+def read_root():
+    return {"status": "GOLD AI v2.0 Online", "features": ["groq-tools", "gemini-vision", "webcam-vision", "tts-stream", "stats", "memory"]}
+
+@app.get("/stats")
+def stats_endpoint():
+    return get_system_stats()
+
+@app.get("/notes")
+def notes_endpoint():
+    return [{"content": r[0], "timestamp": r[1]} for r in get_notes()]
+
+@app.post("/notes")
+async def save_note_endpoint(payload: dict):
+    content = payload.get("content", "").strip()
+    if content:
+        save_note(content)
+        return {"status": "success"}
+    return {"status": "empty"}
+
