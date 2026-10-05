@@ -808,3 +808,33 @@ async def get_ai_response(user_input: str, websocket: WebSocket) -> str:
                 combined_reply = "Done!"
             save_message("assistant", combined_reply)
             return combined_reply
+
+        # Fallback to plain text / legacy regex commands
+        text = choice.content or "I am here."
+        commands = re.findall(r'\[CMD:[^\]]+\]', text)
+        extra_messages = []
+
+        for cmd in commands:
+            text = text.replace(cmd, "").strip()
+            if cmd.startswith("[CMD:OPEN_APP:"):
+                extra_messages.append(execute_open_app(cmd[14:-1]))
+            elif cmd.startswith("[CMD:SEARCH:"):
+                extra_messages.append(execute_search(cmd[12:-1]))
+            elif cmd.startswith("[CMD:WHATSAPP:"):
+                parts = cmd[14:-1].split(":", 1)
+                if len(parts) == 2:
+                    extra_messages.append(execute_whatsapp(parts[0], parts[1]))
+            elif cmd == "[CMD:SCREENSHOT]":
+                await websocket.send_json({"role": "ai", "content": "Looking at your screen..."})
+                analysis = await analyze_screen()
+                extra_messages.append(analysis)
+            elif cmd.startswith("[CMD:SAVE_NOTE:"):
+                note = cmd[15:-1]
+                save_note(note)
+                await websocket.send_json({"type": "note_saved", "content": note})
+                extra_messages.append(f"Saved note: {note}")
+
+        if extra_messages:
+            text = (text + " " + " ".join(extra_messages)).strip()
+        if not text:
+            text = "Done!"
