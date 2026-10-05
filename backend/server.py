@@ -568,3 +568,23 @@ def execute_open_app(name: str) -> str:
     if target in WEB_SERVICES:
         url = WEB_SERVICES[target]
         open_url_safely(url)
+        return f"Opened {name} in your browser."
+    elif target in APP_MAP:
+        exe = APP_MAP[target]
+        if exe.startswith("ms-settings:"):
+            try:
+                os.startfile(exe)
+            except Exception:
+                pass
+        else:
+            try:
+                subprocess.Popen([exe], shell=False)
+            except Exception as e:
+                print(f"Failed to launch {exe}: {e}")
+        return f"Opened {name}."
+    else:
+        # Check if it looks like a web address
+        if "." in target and not target.endswith(".exe") and " " not in target:
+            url = target if target.startswith("http") else f"https://{target}"
+            open_url_safely(url)
+            return f"Opened {name} in your browser."
