@@ -758,3 +758,23 @@ async def get_ai_response(user_input: str, websocket: WebSocket) -> str:
 
             for tool_call in choice.tool_calls:
                 fn_name = tool_call.function.name
+                fn_args = json.loads(tool_call.function.arguments or "{}")
+
+                if fn_name == "open_app":
+                    app_name = fn_args.get("name", "")
+                    res = execute_open_app(app_name)
+                    extra_info.append(res)
+                    target = app_name.lower().strip()
+                    if target in WEB_SERVICES and websocket:
+                        try:
+                            await websocket.send_json({"type": "open_url", "url": WEB_SERVICES[target]})
+                        except Exception:
+                            pass
+                elif fn_name == "search_internet":
+                    q = fn_args.get("query", "")
+                    res = execute_search(q)
+                    extra_info.append(res)
+                    if websocket:
+                        try:
+                            url = f"https://www.google.com/search?q={urllib.parse.quote_plus(q.strip())}"
+                            await websocket.send_json({"type": "open_url", "url": url})
