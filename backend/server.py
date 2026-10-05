@@ -198,3 +198,23 @@ RULES:
 GROQ_TOOLS = [
     {
         "type": "function",
+        "function": {
+            "name": "open_app",
+            "description": "Open an application or website on the user's computer",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string", "description": "The name of the app or website (e.g. chrome, notepad, youtube, calculator)"}
+                },
+                "required": ["name"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_internet",
+            "description": "Search Google for live information, queries, or topics",
+            "parameters": {
+                "type": "object",
+                "properties": {
