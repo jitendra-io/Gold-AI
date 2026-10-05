@@ -278,3 +278,23 @@ GROQ_TOOLS = [
             }
         }
     }
+]
+
+APP_MAP = {
+    "notepad": "notepad.exe", "note pad": "notepad.exe",
+    "calculator": "calc.exe", "calc": "calc.exe",
+    "paint": "mspaint.exe",
+    "chrome": "chrome.exe", "google chrome": "chrome.exe",
+    "firefox": "firefox.exe",
+    "edge": "msedge.exe", "microsoft edge": "msedge.exe",
+    "word": "winword.exe", "microsoft word": "winword.exe",
+    "excel": "excel.exe", "microsoft excel": "excel.exe",
+    "powerpoint": "powerpnt.exe",
+    "explorer": "explorer.exe", "file explorer": "explorer.exe",
+    "cmd": "cmd.exe", "command prompt": "cmd.exe",
+    "task manager": "taskmgr.exe",
+    "spotify": "spotify.exe",
+    "whatsapp": "whatsapp.exe",
+    "vs code": "code", "vscode": "code", "visual studio code": "code",
+    "vlc": "vlc.exe",
+    "snipping tool": "snippingtool.exe",
