@@ -238,3 +238,23 @@ GROQ_TOOLS = [
             }
         }
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "take_screenshot",
+            "description": "Capture the user's screen and analyze it with visual AI",
+            "parameters": {
+                "type": "object",
+                "properties": {}
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "save_note",
+            "description": "Save a note or reminder into the assistant's memory",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "content": {"type": "string", "description": "The note text to save"}
