@@ -668,3 +668,33 @@ def check_direct_intent(user_input: str):
                     "reply": f"Searching Google for {q}."
                 }
 
+    # 4. Direct App / Service Open
+    open_match = re.match(r'^(?:open|launch|start)\s+([a-zA-Z0-9_\-\.\s]+)$', low)
+    if open_match:
+        target = open_match.group(1).strip()
+        if target in WEB_SERVICES:
+            return {
+                "type": "open_url",
+                "url": WEB_SERVICES[target],
+                "reply": f"Opening {target} in your browser."
+            }
+        elif target in APP_MAP:
+            return {
+                "type": "open_app",
+                "name": target,
+                "reply": f"Opening {target}."
+            }
+
+    return None
+
+# ── AI Brain with Native Tool Calling & Fallback Regex ───────
+def _call_groq(messages, tools=None):
+    last_err = None
+    for model_name in GROQ_FALLBACKS:
+        try:
+            params = {
+                "messages": messages,
+                "model": model_name,
+                "temperature": 0.7,
+                "max_tokens": 512,
+            }
