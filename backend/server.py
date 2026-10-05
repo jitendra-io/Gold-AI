@@ -628,3 +628,23 @@ def check_direct_intent(user_input: str):
         r'^(?:search\s+on\s+youtube\s+for\s+)(.+)$',
         r'^(?:search\s+for\s+)(.+?)(?:\s+(?:on|in)\s+youtube)$',
         r'^(?:search\s+)(.+?)(?:\s+(?:on|in)\s+youtube)$',
+        r'^(?:play\s+)(.+?)(?:\s+(?:on|in)\s+youtube)$',
+        r'^(?:play\s+)(.+)$',
+        r'^(?:youtube\s+search\s+)(.+)$',
+        r'^(?:youtube\s+)(.+)$'
+    ]
+    for pat in yt_patterns:
+        m = re.match(pat, low)
+        if m:
+            q = m.group(1).strip()
+            if q and q != "youtube":
+                url = f"https://www.youtube.com/results?search_query={urllib.parse.quote_plus(q)}"
+                return {
+                    "type": "open_url",
+                    "url": url,
+                    "reply": f"Searching YouTube for {q}."
+                }
+
+    # 3. Google / Internet Search patterns
+    google_patterns = [
+        r'^(?:search\s+(?:the\s+)?internet\s+for\s+)(.+)$',
