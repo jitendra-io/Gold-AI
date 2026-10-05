@@ -318,3 +318,23 @@ WEB_SERVICES = {
 # ── TTS (Edge TTS + WebSocket Browser Streaming) ─────────────
 tts_lock = asyncio.Lock()
 
+async def play_and_stream_audio(text: str, websocket: WebSocket = None):
+    async with tts_lock:
+        stop_tts_event.clear()
+        temp_dir = tempfile.gettempdir()
+        audio_file = os.path.join(temp_dir, f"gold_tts_{uuid.uuid4().hex[:8]}.mp3")
+        try:
+            if websocket:
+                try:
+                    await websocket.send_json({"type": "tts_start"})
+                except Exception:
+                    pass
+
+            communicate = edge_tts.Communicate(text, VOICE, rate=VOICE_RATE)
+            await communicate.save(audio_file)
+            
+            if stop_tts_event.is_set():
+                return
+
+            # Read audio file into base64 to stream directly to browser
+            audio_streamed_to_client = False
