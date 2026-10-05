@@ -428,3 +428,23 @@ def get_system_stats():
         "net_recv_mb": round(net.bytes_recv / (1024**2), 1),
     }
 
+# ── Vision: Desktop Screen & Webcam Analysis ─────────────────
+def _attach_input_desktop():
+    """Ensure the worker thread is attached to the active user's input desktop on Windows."""
+    try:
+        import ctypes
+        from ctypes import wintypes
+        user32 = ctypes.windll.user32
+        user32.OpenInputDesktop.restype = wintypes.HDESK
+        user32.OpenInputDesktop.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+        user32.SetThreadDesktop.restype = wintypes.BOOL
+        user32.SetThreadDesktop.argtypes = [wintypes.HDESK]
+        user32.CloseDesktop.restype = wintypes.BOOL
+        user32.CloseDesktop.argtypes = [wintypes.HDESK]
+
+        # 0x01FF covers standard desktop rights
+        hdesk = user32.OpenInputDesktop(0, False, 0x01FF)
+        if hdesk:
+            user32.SetThreadDesktop(hdesk)
+            return hdesk
+    except Exception as e:
