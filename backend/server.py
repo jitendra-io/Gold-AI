@@ -358,3 +358,23 @@ async def play_and_stream_audio(text: str, websocket: WebSocket = None):
                         if stop_tts_event.is_set():
                             pygame.mixer.music.stop()
                             break
+                        await asyncio.sleep(0.05)
+                    pygame.mixer.music.unload()
+                except Exception as e:
+                    print(f"Host pygame playback skipped: {e}")
+
+        except Exception as e:
+            print(f"TTS error: {e}")
+        finally:
+            if websocket:
+                try:
+                    await websocket.send_json({"type": "tts_end"})
+                except Exception:
+                    pass
+            await asyncio.sleep(0.1)
+            if os.path.exists(audio_file):
+                try:
+                    os.remove(audio_file)
+                except Exception:
+                    pass
+
