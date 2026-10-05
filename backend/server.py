@@ -718,3 +718,23 @@ async def get_ai_response(user_input: str, websocket: WebSocket) -> str:
             open_url_safely(url)
             if websocket:
                 try:
+                    await websocket.send_json({"type": "open_url", "url": url})
+                except Exception:
+                    pass
+            reply = direct["reply"]
+            save_message("assistant", reply)
+            return reply
+        elif direct["type"] == "open_app":
+            res = execute_open_app(direct["name"])
+            save_message("assistant", res)
+            return res
+
+    # 2. Query LLM with tools
+    history = load_recent_history(20)
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}] + history
+
+    loop = asyncio.get_running_loop()
+    try:
+        completion = None
+        try:
+            completion = await loop.run_in_executor(None, _call_groq, messages, GROQ_TOOLS)
