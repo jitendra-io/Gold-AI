@@ -608,3 +608,23 @@ def execute_whatsapp(contact: str, message: str) -> str:
 def check_direct_intent(user_input: str):
     text = user_input.strip()
     low = text.lower().strip()
+
+    # 1. Direct YouTube open
+    if low in [
+        "open youtube", "open yt", "launch youtube", "go to youtube", 
+        "youtube", "open youtube in my browser", "start youtube",
+        "can you open youtube", "please open youtube"
+    ]:
+        return {
+            "type": "open_url",
+            "url": "https://www.youtube.com",
+            "reply": "Opening YouTube for you."
+        }
+
+    # 2. YouTube Search and Play patterns
+    yt_patterns = [
+        r'^(?:open\s+youtube\s+(?:and\s+)?(?:search|play)\s+)(.+)$',
+        r'^(?:search\s+youtube\s+for\s+)(.+)$',
+        r'^(?:search\s+on\s+youtube\s+for\s+)(.+)$',
+        r'^(?:search\s+for\s+)(.+?)(?:\s+(?:on|in)\s+youtube)$',
+        r'^(?:search\s+)(.+?)(?:\s+(?:on|in)\s+youtube)$',
