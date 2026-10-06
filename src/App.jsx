@@ -1622,3 +1622,20 @@ export default function App() {
                       onClick={() => openUpdateUrl(updateAvailable.url)}
                       style={{
                         width: '100%',
+                        background: 'linear-gradient(135deg, rgba(255,170,0,0.3), rgba(255,119,0,0.15))',
+                        border: '1px solid #ffaa00',
+                        color: '#ffaa00',
+                        padding: '0.5rem',
+                        borderRadius: 4,
+                        fontSize: '0.7rem',
+                        fontFamily: 'Orbitron, sans-serif',
+                        letterSpacing: 1,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 6,
+                        marginTop: 6
+                      }}
+                    >
+                      <Download size={13} /> DOWNLOAD v{updateAvailable.version} UPDATE
