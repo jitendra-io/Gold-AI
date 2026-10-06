@@ -207,3 +207,212 @@ body {
   content: '';
   position: absolute;
   width: 12px;
+  height: 12px;
+  border-color: var(--neon-blue);
+  border-style: solid;
+}
+
+.panel::before {
+  top: -1px; left: -1px;
+  border-width: 2px 0 0 2px;
+}
+
+.panel::after {
+  bottom: -1px; right: -1px;
+  border-width: 0 2px 2px 0;
+}
+
+.panel-orange::before, .panel-orange::after {
+  border-color: var(--neon-orange);
+}
+
+.panel-header {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--border-blue);
+  color: var(--neon-blue);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 243, 255, 0.04);
+}
+
+.panel-header.orange {
+  border-bottom-color: var(--border-orange);
+  color: var(--neon-orange);
+  background: rgba(255, 79, 0, 0.04);
+}
+
+.panel-content { padding: 0.75rem 1rem; }
+
+/* ─── LEFT COLUMN ─── */
+.left-col {
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* ─── STAT BAR ─── */
+.stat-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.stat-label {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+}
+
+.stat-label .label { color: var(--text-dim); letter-spacing: 1px; }
+.stat-label .value { color: var(--neon-blue); text-shadow: 0 0 8px var(--neon-blue); }
+.stat-label .value.orange { color: var(--neon-orange); text-shadow: 0 0 8px var(--neon-orange); }
+
+.stat-bar-bg {
+  height: 4px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.stat-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--neon-blue), rgba(0,243,255,0.4));
+  box-shadow: 0 0 8px var(--neon-blue);
+  position: relative;
+}
+
+.stat-bar-fill.orange {
+  background: linear-gradient(90deg, var(--neon-orange), rgba(255,79,0,0.4));
+  box-shadow: 0 0 8px var(--neon-orange);
+}
+
+/* Scanning line animation on bars */
+.stat-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 20px; height: 100%;
+  background: rgba(255,255,255,0.4);
+  animation: bar-scan 2s ease-in-out infinite;
+}
+
+@keyframes bar-scan {
+  0% { opacity: 0; transform: translateX(0); }
+  50% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(20px); }
+}
+
+/* ─── VISION FEED ─── */
+.vision-feed {
+  flex: 1;
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(0, 243, 255, 0.25);
+  border-radius: 4px;
+  background: #020712;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 25px rgba(0, 243, 255, 0.08);
+}
+
+.vision-feed::before {
+  content: '';
+  position: absolute;
+  top: -100%;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: linear-gradient(180deg, transparent, rgba(0,243,255,0.06), transparent);
+  animation: scan-line 3s linear infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes scan-line {
+  0% { top: -100%; }
+  100% { top: 200%; }
+}
+
+.vision-no-input {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  opacity: 0.85;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  color: var(--neon-blue);
+}
+
+/* ─── CENTER COLUMN ─── */
+.center-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: relative;
+}
+
+.atom-stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* ─── BOTTOM CONTROLS ─── */
+.bottom-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.75rem;
+}
+
+.ctrl-btn {
+  background: rgba(0,243,255,0.05);
+  border: 1px solid var(--border-blue);
+  color: var(--neon-blue);
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ctrl-btn:hover {
+  background: rgba(0,243,255,0.15);
+  box-shadow: 0 0 20px rgba(0,243,255,0.4);
+}
+
+.ctrl-btn.orange {
+  color: var(--neon-orange);
+  border-color: var(--border-orange);
+  background: rgba(255,79,0,0.05);
+}
+
+.ctrl-btn.orange:hover {
+  background: rgba(255,79,0,0.15);
+  box-shadow: 0 0 20px rgba(255,79,0,0.4);
+}
+
+.server-pill {
+  background: rgba(0,5,12,0.8);
+  border: 1px solid var(--border-orange);
+  border-radius: 20px;
