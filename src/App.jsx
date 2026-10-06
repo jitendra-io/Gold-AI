@@ -1137,3 +1137,103 @@ export default function App() {
           </div>
 
           {/* System Monitor */}
+          <div className="panel">
+            <div className="panel-header"><span><Cpu size={10} style={{marginRight:6}}/>SYSTEM MONITOR</span></div>
+            <div className="panel-content">
+              <StatBar label="CPU LOAD" value={`${stats.cpu_pct.toFixed(1)}%`} pct={stats.cpu_pct} />
+              <StatBar label="RAM USAGE" value={`${stats.ram_pct.toFixed(1)}%`} pct={stats.ram_pct} orange />
+              <StatBar label="DISK USED" value={`${stats.disk_pct.toFixed(1)}%`} pct={stats.disk_pct} />
+              {stats.battery_pct !== null && (
+                <StatBar
+                  label={stats.power_plugged ? "BATTERY (AC)" : "BATTERY"}
+                  value={`${stats.battery_pct}%`}
+                  pct={stats.battery_pct}
+                  orange={stats.battery_pct < 25}
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Network & Temp */}
+          <div className="panel panel-orange">
+            <div className="panel-header orange"><span><Wifi size={10} style={{marginRight:6}}/>NETWORK &amp; TEMP</span></div>
+            <div className="panel-content">
+              <StatBar label="NET SENT" value={`${stats.net_sent_mb} MB`} pct={Math.min(stats.net_sent_mb / 5, 100)} />
+              <StatBar label="NET RECV" value={`${stats.net_recv_mb} MB`} pct={Math.min(stats.net_recv_mb / 5, 100)} orange />
+              <StatBar label="CPU TEMP" value={stats.cpu_temp > 0 ? `${stats.cpu_temp}°C` : 'N/A'} pct={stats.cpu_temp > 0 ? (stats.cpu_temp / 100) * 100 : 0} orange />
+            </div>
+          </div>
+
+        </div>
+
+        {/* ── CENTER COLUMN ── */}
+        <div className="center-col">
+          <div className="panel" style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}}>
+            <div className="atom-stage">
+              {/* Status text above atom */}
+              <AnimatePresence>
+                {statusText && (
+                  <motion.div
+                    key="status"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    style={{
+                      position: 'absolute',
+                      top: 10,
+                      fontFamily: 'Orbitron, sans-serif',
+                      fontSize: '0.75rem',
+                      letterSpacing: '3px',
+                      color: 'var(--neon-orange)',
+                      textShadow: '0 0 15px var(--neon-orange)',
+                      background: 'rgba(255,79,0,0.1)',
+                      border: '1px solid rgba(255,79,0,0.3)',
+                      borderRadius: '4px',
+                      padding: '0.4rem 1rem',
+                      zIndex: 20,
+                    }}
+                  >
+                    {statusText}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <AtomVisualizer speaking={speaking} isVisible={isVisible} />
+              
+              {/* Quick Stop Speaking Button */}
+              {speaking && (
+                <button
+                  onClick={stopSpeaking}
+                  style={{
+                    position: 'absolute',
+                    top: 60,
+                    background: 'rgba(255,79,0,0.25)',
+                    border: '1px solid var(--neon-orange)',
+                    color: 'var(--neon-orange)',
+                    padding: '4px 12px',
+                    borderRadius: '20px',
+                    fontSize: '0.65rem',
+                    fontFamily: 'Orbitron, sans-serif',
+                    letterSpacing: '1px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    zIndex: 25,
+                    boxShadow: '0 0 15px rgba(255,79,0,0.4)',
+                    backdropFilter: 'blur(4px)'
+                  }}
+                  title="Interrupt and stop speaking"
+                >
+                  <Square size={10} fill="currentColor" /> STOP SPEAKING
+                </button>
+              )}
+
+              {/* Status label below atom */}
+              <motion.div
+                animate={isVisible ? { opacity: [0.6, 1, 0.6] } : false}
+                transition={{ repeat: Infinity, duration: 2.5 }}
+                style={{
+                  position: 'absolute',
+                  bottom: 20,
+                  fontFamily: 'Orbitron, sans-serif',
