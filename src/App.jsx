@@ -333,3 +333,170 @@ export default function App() {
   const saveSettings = async () => {
     try {
       await fetch('http://localhost:8000/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ voice: selectedVoice, voice_rate: selectedRate })
+      })
+      setSettingsSaved(true)
+      setTimeout(() => setSettingsSaved(false), 2500)
+    } catch (e) {
+      console.error('Settings save error:', e)
+    }
+  }
+
+  // Camera Management
+  const toggleCamera = async () => {
+    if (cameraActive) {
+      if (cameraStreamRef.current) {
+        cameraStreamRef.current.getTracks().forEach(track => track.stop())
+        cameraStreamRef.current = null
+      }
+      if (videoRef.current) {
+        videoRef.current.srcObject = null
+      }
+      setCameraActive(false)
+    } else {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' }
+        })
+        cameraStreamRef.current = stream
+        setCameraActive(true)
+        requestAnimationFrame(() => {
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream
+            videoRef.current.play().catch(e => console.log('Video play caught:', e))
+          }
+        })
+      } catch (err) {
+        console.error('Webcam access error:', err)
+        alert('Could not access webcam: ' + err.message)
+      }
+    }
+  }
+
+  // Ensure webcam stream is properly attached whenever camera state updates
+  useEffect(() => {
+    if (cameraActive && cameraStreamRef.current && videoRef.current) {
+      if (videoRef.current.srcObject !== cameraStreamRef.current) {
+        videoRef.current.srcObject = cameraStreamRef.current
+      }
+      videoRef.current.play().catch(() => {})
+    }
+  }, [cameraActive])
+
+  // Cycle brightness boost
+  const cycleCameraBoost = () => {
+    if (cameraBoost === 'normal') setCameraBoost('boost')
+    else if (cameraBoost === 'boost') setCameraBoost('night')
+    else setCameraBoost('normal')
+  }
+
+  // Get video filter style based on boost setting
+  const getVideoFilterStyle = () => {
+    if (cameraBoost === 'night') return 'brightness(1.75) contrast(1.25) saturate(1.2)'
+    if (cameraBoost === 'boost') return 'brightness(1.4) contrast(1.15) saturate(1.1)'
+    return 'brightness(1.1) contrast(1.05)'
+  }
+
+  // Capture frame from webcam and send to AI vision
+  const scanWebcamFrame = () => {
+    if (!cameraActive) {
+      alert('Please activate your camera first by clicking "CLICK TO ACTIVATE CAM".')
+      return
+    }
+    if (!videoRef.current || !wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return
+
+    try {
+      const video = videoRef.current
+      if (video.videoWidth === 0 || video.videoHeight === 0) {
+        setStatusText('⏳ Camera warming up, please click again in a moment...')
+        setTimeout(() => setStatusText(''), 3000)
+        return
+      }
+      const canvas = document.createElement('canvas')
+      canvas.width = video.videoWidth || 640
+      canvas.height = video.videoHeight || 480
+      const ctx = canvas.getContext('2d')
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85)
+
+      setStatusText('👁️ Analyzing webcam view...')
+      wsRef.current.send(JSON.stringify({
+        type: 'camera_frame',
+        image: dataUrl
+      }))
+    } catch (e) {
+      console.error('Frame capture error:', e)
+    }
+  }
+
+  // Mute / Unmute Toggle
+  const toggleMute = () => {
+    setIsMuted(prev => {
+      const next = !prev
+      if (next && currentAudioRef.current) {
+        currentAudioRef.current.pause()
+        speakingRef.current = false
+        setSpeaking(false)
+        lastSpeechEndTimeRef.current = Date.now()
+      }
+      return next
+    })
+  }
+
+  // Interrupt / Stop Speaking
+  const stopSpeaking = () => {
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause()
+    }
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ type: 'voice_interrupt' }))
+    }
+    speakingRef.current = false
+    setSpeaking(false)
+    lastSpeechEndTimeRef.current = Date.now()
+    setTimeout(() => {
+      if (!speakingRef.current && recognitionRef.current && !isRecognizingRef.current) {
+        try { recognitionRef.current.start() } catch {}
+      }
+    }, 800)
+  }
+
+  // Quick note add
+  const handleAddQuickNote = async () => {
+    const text = quickNoteInput.trim()
+    if (!text) return
+    const timestamped = `• [${new Date().toLocaleTimeString()}] ${text}`
+    setNotes(prev => `${prev}\n${timestamped}`)
+    setQuickNoteInput('')
+    try {
+      await fetch('http://localhost:8000/notes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: text })
+      })
+    } catch (e) {
+      console.error('Error saving quick note:', e)
+    }
+  }
+
+  // Copy chat message
+  const copyMessage = (text, index) => {
+    navigator.clipboard.writeText(text)
+    setCopiedMsgIndex(index)
+    setTimeout(() => setCopiedMsgIndex(null), 1500)
+  }
+
+  // Share and analyze window / display
+  const shareAndAnalyzeScreen = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: { cursor: "always" } })
+      const video = document.createElement('video')
+      video.srcObject = stream
+      await video.play()
+
+      setTimeout(() => {
+        const canvas = document.createElement('canvas')
+        canvas.width = video.videoWidth || 1280
+        canvas.height = video.videoHeight || 720
