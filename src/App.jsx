@@ -1405,3 +1405,70 @@ export default function App() {
                     {copiedNotes ? 'COPIED' : 'COPY'}
                   </button>
                   <button
+                    onClick={downloadNotes}
+                    style={{ background: 'rgba(255,79,0,0.1)', border: '1px solid var(--border-orange)', color: 'var(--neon-orange)', padding: '3px 8px', borderRadius: 4, fontSize: '0.65rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                  >
+                    <Download size={11} /> SAVE FILE
+                  </button>
+                  <button
+                    onClick={clearNotes}
+                    style={{ marginLeft: 'auto', background: 'rgba(255,0,0,0.1)', border: '1px solid rgba(255,0,0,0.3)', color: '#ff4444', padding: '3px 8px', borderRadius: 4, fontSize: '0.65rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                  >
+                    <Trash2 size={11} /> CLEAR
+                  </button>
+                </div>
+
+                {/* Quick Add Note Row */}
+                <div style={{ display: 'flex', gap: '0.4rem', padding: '0.4rem 0.75rem', background: 'rgba(0,0,0,0.2)', borderBottom: '1px solid rgba(255,79,0,0.15)' }}>
+                  <input
+                    value={quickNoteInput}
+                    onChange={e => setQuickNoteInput(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleAddQuickNote()}
+                    placeholder="Quick note / reminder..."
+                    style={{
+                      flex: 1,
+                      background: 'rgba(5,10,20,0.6)',
+                      border: '1px solid var(--border-orange)',
+                      borderRadius: 4,
+                      padding: '4px 8px',
+                      color: 'var(--text-main)',
+                      fontSize: '0.75rem',
+                      fontFamily: 'var(--font-mono)',
+                      outline: 'none'
+                    }}
+                  />
+                  <button
+                    onClick={handleAddQuickNote}
+                    style={{
+                      background: 'rgba(255,79,0,0.15)',
+                      border: '1px solid var(--neon-orange)',
+                      color: 'var(--neon-orange)',
+                      padding: '4px 10px',
+                      borderRadius: 4,
+                      fontSize: '0.65rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 3,
+                      fontFamily: 'Orbitron, sans-serif'
+                    }}
+                  >
+                    <Plus size={11} /> ADD
+                  </button>
+                </div>
+
+                <textarea
+                  className="notes-area"
+                  value={notes}
+                  onChange={e => handleNotesChange(e.target.value)}
+                  placeholder="Save notes here..."
+                />
+              </div>
+            )}
+
+            {/* Content: Settings View */}
+            {activeTab === 'settings' && (
+              <div style={{ flex: 1, padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto' }}>
+                
+                {/* Voice Selection */}
+                <div>
