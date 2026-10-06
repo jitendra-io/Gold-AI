@@ -1639,3 +1639,20 @@ export default function App() {
                       }}
                     >
                       <Download size={13} /> DOWNLOAD v{updateAvailable.version} UPDATE
+                    </button>
+                  )}
+                </div>
+
+                {/* Reset & Maintenance */}
+                <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <button
+                    onClick={clearChatHistory}
+                    style={{
+                      background: 'rgba(255,79,0,0.1)',
+                      border: '1px solid rgba(255,79,0,0.3)',
+                      color: 'var(--neon-orange)',
+                      padding: '0.5rem',
+                      borderRadius: 4,
+                      fontSize: '0.65rem',
+                      fontFamily: 'Orbitron, sans-serif',
+                      letterSpacing: 1,
