@@ -1572,3 +1572,37 @@ export default function App() {
                 </div>
 
                 {/* AI Models Overview */}
+                <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(0,243,255,0.1)', borderRadius: 4, padding: '0.75rem' }}>
+                  <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', letterSpacing: 1, marginBottom: 4 }}>CORE ARCHITECTURE</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--neon-blue)', marginBottom: 2 }}>• Reasoning Brain: Groq (Qwen 3.8 27B)</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--neon-blue)', marginBottom: 2 }}>• Multimodal Vision: Google Gemini 3.8 Flash (Auto-Fallback)</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--neon-blue)' }}>• Speech Engine: Microsoft Neural Edge TTS (WebAudio Stream)</div>
+                </div>
+
+                {/* Software Version & Updates (Way 1) */}
+                <div style={{ background: 'rgba(0,15,30,0.6)', border: `1px solid ${updateAvailable ? '#ffaa00' : 'rgba(0,243,255,0.2)'}`, borderRadius: 4, padding: '0.75rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                    <div style={{ fontSize: '0.65rem', color: updateAvailable ? '#ffaa00' : 'var(--text-dim)', letterSpacing: 1, fontFamily: 'Orbitron, sans-serif' }}>
+                      SOFTWARE VERSION & UPDATES
+                    </div>
+                    <span style={{ fontSize: '0.65rem', color: 'var(--neon-blue)', fontFamily: 'var(--font-mono)' }}>
+                      v{CURRENT_VERSION}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: updateAvailable ? 8 : 2 }}>
+                    <div style={{ fontSize: '0.7rem', color: updateAvailable ? '#ffaa00' : 'var(--text-main)', maxWidth: '60%' }}>
+                      {updateStatusText || `Running GOLD AI v${CURRENT_VERSION}`}
+                    </div>
+                    <button
+                      onClick={() => checkForUpdates(true)}
+                      disabled={checkingUpdate}
+                      style={{
+                        background: 'rgba(0,243,255,0.1)',
+                        border: '1px solid var(--border-blue)',
+                        color: 'var(--neon-blue)',
+                        padding: '4px 8px',
+                        borderRadius: 4,
+                        fontSize: '0.65rem',
+                        fontFamily: 'Orbitron, sans-serif',
+                        letterSpacing: 1,
