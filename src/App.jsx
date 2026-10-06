@@ -1237,3 +1237,104 @@ export default function App() {
                   position: 'absolute',
                   bottom: 20,
                   fontFamily: 'Orbitron, sans-serif',
+                  fontSize: '0.7rem',
+                  letterSpacing: '6px',
+                  color: listening ? 'var(--neon-blue)' : speaking ? 'var(--neon-orange)' : 'var(--neon-blue)',
+                  textShadow: listening ? '0 0 20px var(--neon-blue)' : speaking ? '0 0 20px var(--neon-orange)' : '0 0 20px var(--neon-blue)',
+                  transition: 'all 0.5s',
+                }}
+              >
+                {listening ? '● LISTENING ●' : speaking ? '◈ SPEAKING ◈' : '◌ STANDBY ◌'}
+              </motion.div>
+            </div>
+
+            {/* Bottom Controls */}
+            <div className="bottom-controls">
+              <button id="screenshot-btn" className="ctrl-btn" onClick={handleScreenshot} title="Analyze Desktop Screen">
+                <Camera size={18} />
+              </button>
+              <button id="screenshare-btn" className="ctrl-btn" onClick={shareAndAnalyzeScreen} title="Share &amp; Analyze Screen/Window">
+                <Monitor size={18} />
+              </button>
+              <div className="server-pill" style={{borderColor: listening ? 'var(--neon-blue)' : 'var(--border-orange)', color: listening ? 'var(--neon-blue)' : 'var(--neon-orange)'}}>
+                <span style={{width:6,height:6,borderRadius:'50%',background: listening ? 'var(--neon-blue)' : 'var(--neon-orange)',boxShadow:`0 0 8px ${listening ? 'var(--neon-blue)' : 'var(--neon-orange)'}`,flexShrink:0,animation:'pulse-green 1s infinite'}} />
+                {listening ? 'LISTENING...' : 'SERVER ACTIVE'}
+              </div>
+              <button id="mic-btn" className={`ctrl-btn orange ${listening ? 'active' : ''}`} onClick={handleVoice} title="Voice Input" style={{boxShadow: listening ? '0 0 20px rgba(0,243,255,0.6)' : ''}}>
+                <Mic size={18} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ── RIGHT COLUMN ── */}
+        <div className="right-col">
+          <div className="panel" style={{flex:1,display:'flex',flexDirection:'column'}}>
+
+            {/* Tab Header */}
+            <div style={{display:'flex',borderBottom:'1px solid var(--border-blue)'}}>
+              <button
+                className={`chat-tab-btn ${activeTab==='chat' ? 'active-blue' : ''}`}
+                onClick={() => setActiveTab('chat')}
+              >
+                <MessageSquare size={14} /> CHAT
+              </button>
+              <button
+                className={`chat-tab-btn ${activeTab==='notes' ? 'active-orange' : ''}`}
+                onClick={() => { setActiveTab('notes'); setHasNewNotes(false); }}
+                style={{ position: 'relative' }}
+              >
+                <FileText size={14} /> NOTES
+                {hasNewNotes && (
+                  <span style={{
+                    position: 'absolute',
+                    top: 6, right: 12,
+                    width: 6, height: 6,
+                    borderRadius: '50%',
+                    background: 'var(--neon-orange)',
+                    boxShadow: '0 0 6px var(--neon-orange)'
+                  }} />
+                )}
+              </button>
+              <button
+                className={`chat-tab-btn ${activeTab==='settings' ? 'active-blue' : ''}`}
+                onClick={() => setActiveTab('settings')}
+              >
+                <SettingsIcon size={14} /> SETTINGS
+              </button>
+            </div>
+
+            {/* Content: Conversation View */}
+            {activeTab === 'chat' && (
+              <>
+                <div className="messages-area">
+                  <AnimatePresence>
+                    {messages.map((msg, i) => (
+                      <motion.div
+                        key={`${i}-${msg.role}-${msg.content?.slice(0, 10)}`}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className={msg.role === 'user' ? 'msg-user' : 'msg-ai'}
+                        style={{ position: 'relative', paddingRight: msg.role === 'user' ? '1rem' : '2rem' }}
+                      >
+                        {msg.role !== 'user' && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4, opacity: 0.9 }}>
+                            <img src="/logo.png" alt="GOLD AI" style={{ width: 16, height: 16, borderRadius: '50%', objectFit: 'cover' }} />
+                            <span style={{ fontFamily: 'Orbitron, sans-serif', fontSize: '0.62rem', color: 'var(--neon-blue)', letterSpacing: 1, fontWeight: 600 }}>GOLD AI</span>
+                          </div>
+                        )}
+                        <div>{msg.content}</div>
+                        {msg.role !== 'user' && (
+                          <button
+                            onClick={() => copyMessage(msg.content, i)}
+                            style={{
+                              position: 'absolute',
+                              top: 6,
+                              right: 6,
+                              background: 'transparent',
+                              border: 'none',
+                              color: copiedMsgIndex === i ? '#00ff88' : 'var(--text-dim)',
+                              cursor: 'pointer',
+                              padding: 2,
+                              opacity: 0.7,
