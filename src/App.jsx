@@ -668,3 +668,170 @@ export default function App() {
   }, [])
 
   // Web Speech API with Echo and Self-Voice Feedback Suppression
+  useEffect(() => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SR) return
+
+    const recognition = new SR()
+    recognition.continuous = true
+    recognition.interimResults = true
+    recognition.lang = 'en-IN'
+    recognitionRef.current = recognition
+
+    let isStoppedManually = false
+
+    recognition.onstart = () => {
+      isRecognizingRef.current = true
+    }
+
+    recognition.onspeechstart = () => {
+      // If AI is currently speaking or inside the 1.5s post-speech echo cooldown, ignore!
+      if (speakingRef.current || (Date.now() - lastSpeechEndTimeRef.current < 1500)) {
+        return
+      }
+      setListening(true)
+    }
+
+    recognition.onspeechend = () => {
+      setListening(false)
+    }
+
+    recognition.onresult = (event) => {
+      // Reject any recognized audio while speaking or within 1.5s after speech ends
+      const timeSinceSpeech = Date.now() - lastSpeechEndTimeRef.current
+      if (speakingRef.current || timeSinceSpeech < 1500) {
+        console.log('Suppressed self-voice echo / buffered speech recognition result')
+        return
+      }
+
+      let finalTranscript = ''
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript
+        }
+      }
+
+      const text = finalTranscript.trim()
+      if (!text) return
+
+      // Self-echo filter: Drop transcript if it matches or is contained in recent AI speech
+      const lowerText = text.toLowerCase().replace(/[^a-z0-9]/g, ' ').trim()
+      const lowerAi = (lastAiTextRef.current || '').toLowerCase().replace(/[^a-z0-9]/g, ' ').trim()
+      if (lowerAi && lowerText.length > 5) {
+        if (lowerAi.includes(lowerText) || lowerText.includes(lowerAi.slice(0, 30))) {
+          console.log('Suppressed echo matching AI response:', text)
+          return
+        }
+      }
+
+      setMessages(prev => [...prev, { role: 'user', content: text }])
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        wsRef.current.send(JSON.stringify({ type: 'voice_text', content: text }))
+      }
+    }
+
+    recognition.onerror = (event) => {
+      if (event.error !== 'aborted' && event.error !== 'no-speech') {
+        console.warn('Speech recognition error:', event.error)
+      }
+    }
+
+    recognition.onend = () => {
+      isRecognizingRef.current = false
+      setListening(false)
+      if (!isStoppedManually && !speakingRef.current && (Date.now() - lastSpeechEndTimeRef.current >= 1500)) {
+        setTimeout(() => {
+          if (!speakingRef.current && recognitionRef.current && !isRecognizingRef.current) {
+            try {
+              recognitionRef.current.start()
+            } catch {
+              // Restart safely
+            }
+          }
+        }, 300)
+      }
+    }
+
+    try {
+      recognition.start()
+    } catch {
+      // Safely catch init error
+    }
+
+    return () => {
+      isStoppedManually = true
+      isRecognizingRef.current = false
+      try {
+        recognition.abort()
+      } catch {
+        // Safely catch cleanup error
+      }
+    }
+  }, [])
+
+  const handleSend = (textToSend = null) => {
+    const query = typeof textToSend === 'string' ? textToSend : inputValue
+    if (!query.trim()) return
+    setMessages(prev => [...prev, { role: 'user', content: query }])
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ type: 'chat', content: query }))
+    }
+    setInputValue('')
+  }
+
+  const handleVoice = () => {
+    if (!recognitionRef.current) return
+    if (speakingRef.current) {
+      stopSpeaking()
+    }
+    setListening(true)
+    try {
+      recognitionRef.current.start()
+    } catch {
+      // Already running
+    }
+  }
+
+  const handleScreenshot = () => {
+    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return
+    wsRef.current.send(JSON.stringify({ type: 'screenshot' }))
+  }
+
+  const days = ['SUN','MON','TUE','WED','THU','FRI','SAT']
+  const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC']
+  const dateStr = `${days[time.getDay()]} ${String(time.getDate()).padStart(2,'0')} ${months[time.getMonth()]} ${time.getFullYear()}`
+  const timeStr = time.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
+
+  return (
+    <div id="root" style={{ display:'flex', flexDirection:'column', height:'100vh', width:'100vw' }}>
+
+      {/* ── TOP BAR ── */}
+      <div className="topbar">
+        {/* Brand */}
+        <div className="topbar-brand">
+          <div className="wang-brand-avatar-wrap">
+            <img src="/logo.png" alt="GOLD AI" className="wang-brand-avatar" />
+          </div>
+          <div>
+            <div className="brand-name">GOLD AI</div>
+            <div className="brand-subtitle">Advanced AI Interface v2.0</div>
+          </div>
+          <div style={{ display:'flex', alignItems:'center', gap:'0.4rem', marginLeft:'1rem' }}>
+            <div className={`status-dot ${connectionStatus}`} />
+            <span style={{
+              fontFamily:'var(--font-mono)',
+              fontSize:'0.6rem',
+              color: connectionStatus === 'connected' ? '#00ff88' : connectionStatus === 'reconnecting' ? '#ffaa00' : '#ff4444',
+              letterSpacing:'2px'
+            }}>
+              {connectionStatus === 'connected' ? 'ONLINE' : connectionStatus === 'reconnecting' ? 'RECONNECTING' : 'OFFLINE'}
+            </span>
+          </div>
+        </div>
+
+        {/* Date & Time */}
+        <div className="datetime-block">
+          <div className="datetime-time">{timeStr}</div>
+          <div className="datetime-date">{dateStr}</div>
+        </div>
+
