@@ -500,3 +500,171 @@ export default function App() {
         const canvas = document.createElement('canvas')
         canvas.width = video.videoWidth || 1280
         canvas.height = video.videoHeight || 720
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85)
+        
+        stream.getTracks().forEach(track => track.stop())
+        setStatusText('🖥️ Analyzing screen capture...')
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+          wsRef.current.send(JSON.stringify({ type: 'screen_frame', image: dataUrl }))
+        }
+      }, 500)
+    } catch (err) {
+      console.log('Screen capture aborted or unavailable:', err)
+    }
+  }
+
+  // Test voice sample in settings
+  const testVoiceSample = () => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({
+        type: 'chat',
+        content: 'Say hello in one friendly sentence to test the selected voice and speech rate.'
+      }))
+    }
+  }
+
+  // WebSocket Connection with Auto-Reconnect
+  useEffect(() => {
+    let isUnmounted = false
+
+    const connectWs = () => {
+      if (isUnmounted) return
+      setConnectionStatus('connecting')
+      const socket = new WebSocket('ws://localhost:8000/ws')
+      wsRef.current = socket
+
+      socket.onopen = () => {
+        setConnectionStatus('connected')
+      }
+
+      socket.onmessage = (e) => {
+        try {
+          const data = JSON.parse(e.data)
+          if (data.type === 'stats') {
+            setStats(data)
+          } else if (data.type === 'status') {
+            setStatusText(data.content)
+          } else if (data.type === 'history') {
+            if (Array.isArray(data.messages) && data.messages.length > 0) {
+              setMessages(data.messages)
+            }
+          } else if (data.type === 'tts_start') {
+            speakingRef.current = true
+            if (!isMutedRef.current) setSpeaking(true)
+            if (recognitionRef.current) {
+              try { recognitionRef.current.abort() } catch {}
+            }
+          } else if (data.type === 'tts_end') {
+            if (!currentAudioRef.current || currentAudioRef.current.paused || currentAudioRef.current.ended) {
+              speakingRef.current = false
+              setSpeaking(false)
+              lastSpeechEndTimeRef.current = Date.now()
+            }
+          } else if (data.type === 'tts_audio') {
+            if (data.audio && !isMutedRef.current) {
+              try {
+                if (currentAudioRef.current) {
+                  currentAudioRef.current.pause()
+                }
+                speakingRef.current = true
+                setSpeaking(true)
+                if (recognitionRef.current) {
+                  try { recognitionRef.current.abort() } catch {}
+                }
+
+                const audio = new Audio('data:audio/mp3;base64,' + data.audio)
+                currentAudioRef.current = audio
+
+                audio.onplay = () => {
+                  speakingRef.current = true
+                  setSpeaking(true)
+                  if (recognitionRef.current) {
+                    try { recognitionRef.current.abort() } catch {}
+                  }
+                }
+
+                const handlePlaybackEnded = () => {
+                  speakingRef.current = false
+                  setSpeaking(false)
+                  lastSpeechEndTimeRef.current = Date.now()
+                  // Acoustic echo cooldown: Allow 1.2s for room reverb to clear before resuming speech recognition
+                  setTimeout(() => {
+                    if (!speakingRef.current && recognitionRef.current && !isRecognizingRef.current) {
+                      try {
+                        recognitionRef.current.start()
+                      } catch {
+                        // Already started or active
+                      }
+                    }
+                  }, 1200)
+                }
+
+                audio.onended = handlePlaybackEnded
+                audio.onerror = handlePlaybackEnded
+
+                audio.play().catch(err => {
+                  console.log('Audio autoplay prevented:', err)
+                  handlePlaybackEnded()
+                })
+              } catch (err) {
+                console.log('Audio playback error:', err)
+                speakingRef.current = false
+                setSpeaking(false)
+              }
+            }
+          } else if (data.type === 'voice_listening') {
+            setListening(true)
+          } else if (data.type === 'voice_failed') {
+            setListening(false)
+          } else if (data.type === 'open_url') {
+            if (data.url) {
+              if (window.electronAPI && typeof window.electronAPI.openExternal === 'function') {
+                window.electronAPI.openExternal(data.url);
+              } else {
+                window.open(data.url, '_blank');
+              }
+            }
+          } else if (data.type === 'note_saved') {
+            setNotes(prev => `${prev}\n• [${new Date().toLocaleTimeString()}] ${data.content}`)
+            if (activeTabRef.current !== 'notes') {
+              setHasNewNotes(true)
+            }
+          } else if (data.role) {
+            setListening(false)
+            if (data.role === 'ai' || data.role === 'assistant') {
+              lastAiTextRef.current = data.content || ''
+            }
+            setMessages(prev => [...prev, { role: data.role, content: data.content }])
+          }
+        } catch (err) {
+          console.error('Error parsing WS message:', err)
+        }
+      }
+
+      socket.onclose = () => {
+        if (!isUnmounted) {
+          setConnectionStatus('reconnecting')
+          reconnectTimeoutRef.current = setTimeout(connectWs, 3000)
+        }
+      }
+
+      socket.onerror = () => {
+        setConnectionStatus('disconnected')
+      }
+    }
+
+    connectWs()
+
+    return () => {
+      isUnmounted = true
+      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current)
+      if (wsRef.current) wsRef.current.close()
+      if (cameraStreamRef.current) {
+        cameraStreamRef.current.getTracks().forEach(track => track.stop())
+      }
+    }
+  }, [])
+
+  // Web Speech API with Echo and Self-Voice Feedback Suppression
