@@ -988,3 +988,14 @@ async def websocket_endpoint(websocket: WebSocket):
                 asyncio.create_task(play_and_stream_audio(analysis, websocket))
 
     except WebSocketDisconnect:
+        pass
+    except Exception as e:
+        print(f"WebSocket error: {e}")
+    finally:
+        stats_task.cancel()
+
+if __name__ == "__main__":
+    import multiprocessing
+    multiprocessing.freeze_support()
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")
