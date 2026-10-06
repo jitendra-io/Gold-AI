@@ -1003,3 +1003,137 @@ export default function App() {
                   >
                     {cameraBoost === 'night' ? <Moon size={9} /> : <Sun size={9} />}
                     {cameraBoost.toUpperCase()}
+                  </button>
+                )}
+
+                {/* Fill Light (Screen Torch for dark rooms) */}
+                {cameraActive && (
+                  <button
+                    onClick={() => setFillLight(!fillLight)}
+                    style={{
+                      background: fillLight ? 'rgba(255,255,255,0.25)' : 'transparent',
+                      border: `1px solid ${fillLight ? '#ffffff' : 'var(--border-blue)'}`,
+                      color: fillLight ? '#ffffff' : 'var(--text-dim)',
+                      borderRadius: '4px',
+                      padding: '2px 5px',
+                      fontSize: '0.55rem',
+                      cursor: 'pointer'
+                    }}
+                    title="Face Illumination Light"
+                  >
+                    LIGHT
+                  </button>
+                )}
+
+                {/* Camera ON/OFF */}
+                <button
+                  onClick={toggleCamera}
+                  style={{
+                    background: cameraActive ? 'rgba(0,255,136,0.15)' : 'rgba(0,243,255,0.1)',
+                    border: `1px solid ${cameraActive ? '#00ff88' : 'var(--border-blue)'}`,
+                    color: cameraActive ? '#00ff88' : 'var(--neon-blue)',
+                    borderRadius: '4px',
+                    padding: '2px 6px',
+                    fontSize: '0.6rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4
+                  }}
+                  title={cameraActive ? "Turn camera off" : "Turn camera on"}
+                >
+                  {cameraActive ? <VideoOff size={10} /> : <Video size={10} />}
+                  {cameraActive ? 'STOP' : 'CAM'}
+                </button>
+              </div>
+            </div>
+
+            <div className="panel-content" style={{ flex: 1, display:'flex', flexDirection:'column', padding: '0.5rem', position: 'relative' }}>
+              <div
+                className="vision-feed"
+                style={{
+                  flex: 1,
+                  position: 'relative',
+                  borderRadius: 4,
+                  overflow: 'hidden',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: fillLight ? '0 0 35px rgba(255,255,255,0.4), inset 0 0 25px rgba(255,255,255,0.3)' : 'inset 0 0 25px rgba(0,243,255,0.08)',
+                  transition: 'box-shadow 0.3s'
+                }}
+              >
+                {cameraActive ? (
+                  <>
+                    <video
+                      ref={(el) => {
+                        videoRef.current = el
+                        if (el && cameraStreamRef.current && el.srcObject !== cameraStreamRef.current) {
+                          el.srcObject = cameraStreamRef.current
+                          el.play().catch(() => {})
+                        }
+                      }}
+                      autoPlay
+                      playsInline
+                      muted
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        transform: 'scaleX(-1)',
+                        filter: getVideoFilterStyle(),
+                        transition: 'filter 0.3s'
+                      }}
+                    />
+                    
+                    {/* Cyber overlay brackets */}
+                    <div style={{ position: 'absolute', top: 6, left: 6, width: 12, height: 12, borderTop: '2px solid var(--neon-blue)', borderLeft: '2px solid var(--neon-blue)' }} />
+                    <div style={{ position: 'absolute', top: 6, right: 6, width: 12, height: 12, borderTop: '2px solid var(--neon-blue)', borderRight: '2px solid var(--neon-blue)' }} />
+                    <div style={{ position: 'absolute', bottom: 6, left: 6, width: 12, height: 12, borderBottom: '2px solid var(--neon-blue)', borderLeft: '2px solid var(--neon-blue)' }} />
+                    <div style={{ position: 'absolute', bottom: 6, right: 6, width: 12, height: 12, borderBottom: '2px solid var(--neon-blue)', borderRight: '2px solid var(--neon-blue)' }} />
+
+                    {/* Scan Frame Action Button */}
+                    <button
+                      onClick={scanWebcamFrame}
+                      style={{
+                        position: 'absolute',
+                        bottom: 10,
+                        background: 'rgba(0,5,15,0.85)',
+                        border: '1px solid var(--neon-blue)',
+                        color: 'var(--neon-blue)',
+                        padding: '4px 10px',
+                        borderRadius: 16,
+                        fontSize: '0.65rem',
+                        fontFamily: 'Orbitron, sans-serif',
+                        letterSpacing: '1px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        boxShadow: '0 0 12px rgba(0,243,255,0.3)',
+                        backdropFilter: 'blur(4px)'
+                      }}
+                      title="Analyze this view with Gemini Vision"
+                    >
+                      <Scan size={12} /> SCAN FRAME
+                    </button>
+                  </>
+                ) : (
+                  <div
+                    onClick={toggleCamera}
+                    className="vision-no-input"
+                    style={{ cursor: 'pointer', transition: 'all 0.2s', padding: '1rem', textAlign: 'center' }}
+                    title="Click to activate your webcam"
+                  >
+                    <Camera size={26} style={{ color: 'var(--neon-blue)', opacity: 0.9 }} />
+                    <span>NO INPUT DETECTED</span>
+                    <span style={{ fontSize:'0.55rem', letterSpacing: 2, color: 'var(--neon-blue)', opacity: 0.9, marginTop: 4 }}>
+                      CLICK TO ACTIVATE CAM
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* System Monitor */}
