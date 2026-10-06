@@ -1472,3 +1472,70 @@ export default function App() {
                 
                 {/* Voice Selection */}
                 <div>
+                  <label style={{ display: 'block', fontSize: '0.7rem', color: 'var(--neon-blue)', letterSpacing: 1, marginBottom: 6, fontFamily: 'Orbitron, sans-serif' }}>
+                    AI VOICE PERSONA
+                  </label>
+                  <select
+                    value={selectedVoice}
+                    onChange={e => setSelectedVoice(e.target.value)}
+                    style={{
+                      width: '100%',
+                      background: 'rgba(0,10,25,0.8)',
+                      border: '1px solid var(--border-blue)',
+                      color: 'var(--text-main)',
+                      padding: '0.5rem',
+                      borderRadius: 4,
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: '0.75rem',
+                      outline: 'none'
+                    }}
+                  >
+                    <option value="en-IN-NeerjaExpressiveNeural">Neerja (Indian English - Female)</option>
+                    <option value="en-IN-PrabhatNeural">Prabhat (Indian English - Male)</option>
+                    <option value="en-US-JennyNeural">Jenny (US English - Female)</option>
+                    <option value="en-GB-SoniaNeural">Sonia (UK English - Female)</option>
+                  </select>
+                </div>
+
+                {/* Speech Speed */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.7rem', color: 'var(--neon-blue)', letterSpacing: 1, marginBottom: 6, fontFamily: 'Orbitron, sans-serif' }}>
+                    VOICE SPEED (RATE)
+                  </label>
+                  <select
+                    value={selectedRate}
+                    onChange={e => setSelectedRate(e.target.value)}
+                    style={{
+                      width: '100%',
+                      background: 'rgba(0,10,25,0.8)',
+                      border: '1px solid var(--border-blue)',
+                      color: 'var(--text-main)',
+                      padding: '0.5rem',
+                      borderRadius: 4,
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: '0.75rem',
+                      outline: 'none'
+                    }}
+                  >
+                    <option value="+0%">Normal (+0%)</option>
+                    <option value="+15%">Brisk (+15%)</option>
+                    <option value="+30%">Energetic (+30% - Recommended)</option>
+                    <option value="+45%">Fast (+45%)</option>
+                  </select>
+                </div>
+
+                {/* Buttons Row: Save Settings + Test Voice */}
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button
+                    onClick={saveSettings}
+                    style={{
+                      flex: 1,
+                      background: settingsSaved ? 'rgba(0,255,136,0.2)' : 'linear-gradient(135deg, rgba(0,243,255,0.2), rgba(0,243,255,0.05))',
+                      border: `1px solid ${settingsSaved ? '#00ff88' : 'var(--neon-blue)'}`,
+                      color: settingsSaved ? '#00ff88' : 'var(--neon-blue)',
+                      padding: '0.6rem',
+                      borderRadius: 4,
+                      cursor: 'pointer',
+                      fontFamily: 'Orbitron, sans-serif',
+                      fontSize: '0.7rem',
+                      letterSpacing: 2,
