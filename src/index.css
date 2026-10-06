@@ -1,0 +1,209 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600&display=swap');
+
+:root {
+  --neon-blue: #00f3ff;
+  --neon-orange: #ff4f00;
+  --neon-blue-dim: rgba(0, 243, 255, 0.15);
+  --neon-orange-dim: rgba(255, 79, 0, 0.15);
+  --bg-dark: #03050a;
+  --panel-bg: rgba(5, 10, 20, 0.85);
+  --border-blue: rgba(0, 243, 255, 0.25);
+  --border-orange: rgba(255, 79, 0, 0.25);
+  --text-main: #c8d8e8;
+  --text-dim: rgba(180, 200, 220, 0.5);
+  --font-mono: 'Share Tech Mono', 'Courier New', monospace;
+}
+
+
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Rajdhani', sans-serif;
+  background-color: var(--bg-dark);
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(0, 243, 255, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 50%, rgba(255, 79, 0, 0.04) 0%, transparent 50%),
+    linear-gradient(180deg, #03050a 0%, #050a10 100%);
+  color: var(--text-main);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+#root { width: 100vw; height: 100vh; display: flex; flex-direction: column; }
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 2px; }
+
+/* ─── TOPBAR ─── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 135px 0.5rem 1.5rem;
+  background: rgba(0,5,12,0.9);
+  border-bottom: 1px solid var(--border-blue);
+  box-shadow: 0 2px 30px rgba(0, 243, 255, 0.08);
+  flex-shrink: 0;
+  z-index: 10;
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+.topbar button,
+.topbar input,
+.topbar select,
+.topbar a,
+.topbar-nav {
+  -webkit-app-region: no-drag;
+}
+
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.brand-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: var(--neon-blue);
+  text-shadow: 0 0 20px rgba(0, 243, 255, 0.8), 0 0 40px rgba(0, 243, 255, 0.4);
+}
+
+.brand-subtitle {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--neon-orange);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #00ff88;
+  box-shadow: 0 0 10px #00ff88;
+  animation: pulse-green 2s ease-in-out infinite;
+}
+
+.status-dot.connected {
+  background: #00ff88;
+  box-shadow: 0 0 10px #00ff88;
+  animation: pulse-green 2s ease-in-out infinite;
+}
+
+.status-dot.reconnecting {
+  background: #ffaa00;
+  box-shadow: 0 0 10px #ffaa00;
+  animation: pulse-yellow 1.5s ease-in-out infinite;
+}
+
+.status-dot.disconnected {
+  background: #ff4444;
+  box-shadow: 0 0 10px #ff4444;
+  animation: pulse-red 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-green {
+  0%, 100% { opacity: 1; box-shadow: 0 0 10px #00ff88; }
+  50% { opacity: 0.5; box-shadow: 0 0 20px #00ff88; }
+}
+
+@keyframes pulse-yellow {
+  0%, 100% { opacity: 1; box-shadow: 0 0 10px #ffaa00; }
+  50% { opacity: 0.4; box-shadow: 0 0 20px #ffaa00; }
+}
+
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; box-shadow: 0 0 10px #ff4444; }
+  50% { opacity: 0.3; box-shadow: 0 0 20px #ff4444; }
+}
+
+@keyframes pulse-orange {
+  0%, 100% { opacity: 1; box-shadow: 0 0 15px rgba(255,79,0,0.5); }
+  50% { opacity: 0.6; box-shadow: 0 0 25px rgba(255,79,0,0.8); }
+}
+
+/* ─── DATETIME BLOCK ─── */
+.datetime-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.datetime-time {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--neon-blue);
+  text-shadow: 0 0 15px rgba(0, 243, 255, 0.9);
+  letter-spacing: 3px;
+}
+
+.datetime-date {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--neon-orange);
+  letter-spacing: 2px;
+  text-shadow: 0 0 8px rgba(255, 79, 0, 0.7);
+}
+
+/* ─── TOPBAR NAV ─── */
+.topbar-nav {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.nav-btn {
+  background: transparent;
+  border: 1px solid rgba(0, 243, 255, 0.2);
+  color: var(--text-dim);
+  padding: 0.35rem 1rem;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.6rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+}
+
+.nav-btn:hover, .nav-btn.active {
+  background: var(--neon-blue-dim);
+  color: var(--neon-blue);
+  border-color: var(--neon-blue);
+  box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+  text-shadow: 0 0 8px var(--neon-blue);
+}
+
+/* ─── MAIN LAYOUT ─── */
+.main-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  padding: 1rem;
+  gap: 1rem;
+}
+
+/* ─── PANELS ─── */
+.panel {
+  background: var(--panel-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-blue);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Corner accents on panels */
+.panel::before, .panel::after {
+  content: '';
+  position: absolute;
+  width: 12px;
