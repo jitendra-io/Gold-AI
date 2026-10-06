@@ -898,3 +898,23 @@ def update_settings(payload: dict):
 def clear_history():
     with get_db() as conn:
         c = conn.cursor()
+        c.execute("DELETE FROM chat_history")
+        conn.commit()
+    return {"status": "success"}
+
+# ── Main WebSocket ────────────────────────────────────────────
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+
+    # Load existing chat history or create greeting once if DB is empty
+    history = load_recent_history(50)
+    if not history:
+        welcome = "Greetings. I am GOLD AI, your advanced AI assistant. All systems are online. How can I assist you today?"
+        save_message("assistant", welcome)
+        await websocket.send_json({"type": "history", "messages": [{"role": "ai", "content": welcome}]})
+        asyncio.create_task(play_and_stream_audio(welcome, websocket))
+    else:
+        formatted_history = [{"role": "user" if msg["role"] == "user" else "ai", "content": msg["content"]} for msg in history]
+        await websocket.send_json({"type": "history", "messages": formatted_history})
+
