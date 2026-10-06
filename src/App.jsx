@@ -835,3 +835,171 @@ export default function App() {
           <div className="datetime-date">{dateStr}</div>
         </div>
 
+        {/* Right side controls: Audio Mute + Tabs */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          {/* Audio Mute / Unmute Toggle */}
+          <button
+            onClick={toggleMute}
+            className="mute-btn"
+            style={{
+              background: isMuted ? 'rgba(255,68,68,0.15)' : 'rgba(0,243,255,0.08)',
+              border: `1px solid ${isMuted ? '#ff4444' : 'var(--border-blue)'}`,
+              color: isMuted ? '#ff4444' : 'var(--neon-blue)',
+              borderRadius: '20px',
+              padding: '4px 10px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 5,
+              fontSize: '0.65rem',
+              fontFamily: 'var(--font-mono)',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+            title={isMuted ? "AI Voice is Muted (Click to enable)" : "AI Voice is Active (Click to mute)"}
+          >
+            {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+            <span>{isMuted ? 'MUTED' : 'VOICE ON'}</span>
+          </button>
+
+          {/* Nav Tabs */}
+          <div className="topbar-nav">
+            <button className={`nav-btn ${activeTab === 'chat' ? 'active' : ''}`} onClick={() => setActiveTab('chat')}>DASHBOARD</button>
+            <button
+              className={`nav-btn ${activeTab === 'notes' ? 'active' : ''}`}
+              onClick={() => { setActiveTab('notes'); setHasNewNotes(false); }}
+              style={{ position: 'relative' }}
+            >
+              NOTES
+              {hasNewNotes && (
+                <span style={{
+                  position: 'absolute',
+                  top: -2, right: -2,
+                  width: 7, height: 7,
+                  borderRadius: '50%',
+                  background: 'var(--neon-orange)',
+                  boxShadow: '0 0 8px var(--neon-orange)',
+                  animation: 'pulse-green 1.5s infinite'
+                }} />
+              )}
+            </button>
+            <button
+              className={`nav-btn ${activeTab === 'settings' ? 'active' : ''}`}
+              onClick={() => setActiveTab('settings')}
+              style={{ position: 'relative' }}
+            >
+              SETTINGS
+              {updateAvailable && (
+                <span style={{
+                  position: 'absolute',
+                  top: -2, right: -2,
+                  width: 7, height: 7,
+                  borderRadius: '50%',
+                  background: '#ffaa00',
+                  boxShadow: '0 0 8px #ffaa00'
+                }} />
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── UPDATE NOTIFICATION BANNER ── */}
+      {updateAvailable && !bannerDismissed && (
+        <div style={{
+          background: 'linear-gradient(90deg, rgba(255,170,0,0.2) 0%, rgba(0,243,255,0.1) 100%)',
+          borderBottom: '1px solid rgba(255,170,0,0.4)',
+          padding: '0.35rem 1.5rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          fontSize: '0.75rem',
+          flexShrink: 0,
+          zIndex: 10
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <ArrowUpCircle size={15} color="#ffaa00" />
+            <span style={{ fontFamily: 'Rajdhani, sans-serif', letterSpacing: '0.5px' }}>
+              <strong style={{ color: '#ffaa00' }}>UPDATE AVAILABLE:</strong> GOLD AI v{updateAvailable.version} is available to install!
+            </span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <button
+              onClick={() => openUpdateUrl(updateAvailable.url)}
+              style={{
+                background: 'linear-gradient(135deg, #ffaa00, #ff7700)',
+                border: 'none',
+                color: '#000',
+                fontWeight: 700,
+                padding: '3px 10px',
+                borderRadius: 4,
+                cursor: 'pointer',
+                fontSize: '0.65rem',
+                fontFamily: 'Orbitron, sans-serif',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4
+              }}
+            >
+              <Download size={11} /> DOWNLOAD UPDATE
+            </button>
+            <button
+              onClick={() => setBannerDismissed(true)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text-dim)',
+                cursor: 'pointer',
+                fontSize: '0.85rem',
+                padding: '2px 6px',
+                lineHeight: 1
+              }}
+              title="Dismiss banner"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── MAIN LAYOUT ── */}
+      <div className="main-layout">
+
+        {/* ── LEFT COLUMN ── */}
+        <div className="left-col">
+
+          {/* Real Live Vision Feed (With Brightness & Fill Light Boost) */}
+          <div className="panel" style={{ flex: 1.2, display:'flex', flexDirection:'column', minHeight: 250 }}>
+            <div className="panel-header">
+              <span style={{ display:'flex', alignItems:'center', gap: 6 }}>
+                <Eye size={12} /> VISION FEED
+              </span>
+              <div style={{ display:'flex', alignItems:'center', gap: 6 }}>
+                <span style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.6rem',
+                  letterSpacing: '1px',
+                  color: cameraActive ? '#00ff88' : 'var(--text-dim)'
+                }}>
+                  {cameraActive ? 'LIVE' : 'OFFLINE'}
+                </span>
+                
+                {/* Brightness Boost Toggle */}
+                {cameraActive && (
+                  <button
+                    onClick={cycleCameraBoost}
+                    style={{
+                      background: cameraBoost === 'night' ? 'rgba(255,170,0,0.2)' : cameraBoost === 'boost' ? 'rgba(0,243,255,0.2)' : 'transparent',
+                      border: `1px solid ${cameraBoost === 'night' ? '#ffaa00' : 'var(--border-blue)'}`,
+                      color: cameraBoost === 'night' ? '#ffaa00' : 'var(--neon-blue)',
+                      borderRadius: '4px',
+                      padding: '2px 5px',
+                      fontSize: '0.55rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 3
+                    }}
+                    title="Toggle Lighting Boost (Normal / Boost / Night)"
+                  >
+                    {cameraBoost === 'night' ? <Moon size={9} /> : <Sun size={9} />}
+                    {cameraBoost.toUpperCase()}
