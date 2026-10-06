@@ -165,3 +165,171 @@ export default function App() {
     for (let i = 0; i < Math.max(c.length, l.length); i++) {
       const cv = c[i] || 0
       const lv = l[i] || 0
+      if (lv > cv) return true
+      if (lv < cv) return false
+    }
+    return false
+  }
+
+  const checkForUpdates = async (isManual = false) => {
+    setCheckingUpdate(true)
+    if (isManual) setUpdateStatusText('Checking GitHub releases...')
+    try {
+      const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`, {
+        headers: { Accept: 'application/vnd.github.v3+json' }
+      })
+      if (res.ok) {
+        const data = await res.json()
+        const latestTag = data.tag_name || data.name || ''
+        const latestVer = latestTag.replace(/^v/, '')
+        const exeAsset = data.assets?.find(a => a.name.endsWith('.exe'))
+        const releaseUrl = exeAsset?.browser_download_url || data.html_url || `https://github.com/${GITHUB_REPO}/releases/latest`
+
+        if (isNewerVersion(CURRENT_VERSION, latestVer)) {
+          setUpdateAvailable({ version: latestVer, url: releaseUrl, name: data.name, notes: data.body })
+          setUpdateStatusText(`🚀 Update available: v${latestVer}!`)
+        } else {
+          setUpdateAvailable(null)
+          setUpdateStatusText(`✨ GOLD AI is up to date (v${CURRENT_VERSION})`)
+        }
+      } else if (res.status === 404) {
+        setUpdateStatusText(`Latest version v${CURRENT_VERSION} (No newer release on GitHub).`)
+      } else {
+        setUpdateStatusText(`Update check response: ${res.status}`)
+      }
+    } catch (err) {
+      console.warn('Update check failed:', err)
+      if (isManual) setUpdateStatusText('Update check unavailable (offline).')
+    } finally {
+      setCheckingUpdate(false)
+    }
+  }
+
+  const openUpdateUrl = (targetUrl) => {
+    const url = targetUrl || updateAvailable?.url || `https://github.com/${GITHUB_REPO}/releases/latest`
+    if (window.electronAPI && typeof window.electronAPI.openExternal === 'function') {
+      window.electronAPI.openExternal(url)
+    } else {
+      window.open(url, '_blank')
+    }
+  }
+
+  // Silent update check 3 seconds after launch
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      checkForUpdates(false)
+    }, 3000)
+    return () => clearTimeout(timer)
+  }, [])
+
+  const messagesEndRef        = useRef(null)
+  const wsRef                 = useRef(null)
+  const reconnectTimeoutRef   = useRef(null)
+  const speakingRef           = useRef(speaking)
+  const lastSpeechEndTimeRef  = useRef(0)
+  const lastAiTextRef         = useRef('')
+  const activeTabRef          = useRef(activeTab)
+  const recognitionRef        = useRef(null)
+  const isRecognizingRef      = useRef(false)
+  const notesSaveTimeout      = useRef(null)
+  const currentAudioRef       = useRef(null)
+
+  useEffect(() => {
+    activeTabRef.current = activeTab
+  }, [activeTab])
+
+  // Tab visibility listener
+  useEffect(() => {
+    const handleVisibility = () => setIsVisible(!document.hidden)
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => document.removeEventListener('visibilitychange', handleVisibility)
+  }, [])
+
+  // Keep speakingRef updated
+  useEffect(() => {
+    speakingRef.current = speaking
+  }, [speaking])
+
+  // Live clock
+  useEffect(() => {
+    const t = setInterval(() => setTime(new Date()), 1000)
+    return () => clearInterval(t)
+  }, [])
+
+  // Auto-scroll chat
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  // Fetch initial notes and settings on mount
+  useEffect(() => {
+    fetch('http://localhost:8000/notes')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          const formatted = data.map(n => `• [${new Date(n.timestamp).toLocaleTimeString()}] ${n.content}`).join('\n')
+          setNotes(`GOLD NOTES\n────────────────────────\n${formatted}`)
+        }
+      })
+      .catch(err => console.log('Could not load notes:', err))
+
+    fetch('http://localhost:8000/settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data.voice) setSelectedVoice(data.voice)
+        if (data.voice_rate) setSelectedRate(data.voice_rate)
+      })
+      .catch(err => console.log('Could not load settings:', err))
+  }, [])
+
+  // Debounced note saving
+  const handleNotesChange = (newText) => {
+    setNotes(newText)
+    if (notesSaveTimeout.current) clearTimeout(notesSaveTimeout.current)
+    notesSaveTimeout.current = setTimeout(() => {
+      fetch('http://localhost:8000/notes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: newText })
+      }).catch(err => console.log('Error saving note:', err))
+    }, 1500)
+  }
+
+  // Copy notes to clipboard
+  const copyNotesToClipboard = () => {
+    navigator.clipboard.writeText(notes)
+    setCopiedNotes(true)
+    setTimeout(() => setCopiedNotes(false), 2000)
+  }
+
+  // Download notes as text file
+  const downloadNotes = () => {
+    const blob = new Blob([notes], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `gold_notes_${new Date().toISOString().slice(0, 10)}.txt`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  // Clear notes
+  const clearNotes = async () => {
+    if (window.confirm('Are you sure you want to clear all notes?')) {
+      await fetch('http://localhost:8000/notes', { method: 'DELETE' }).catch(() => {})
+      setNotes('GOLD NOTES\n────────────────────────\n')
+    }
+  }
+
+  // Clear chat history
+  const clearChatHistory = async () => {
+    if (window.confirm('Clear conversation memory?')) {
+      await fetch('http://localhost:8000/clear-history', { method: 'POST' }).catch(() => {})
+      setMessages([{ role: 'ai', content: 'Conversation memory cleared. Ready for new commands.' }])
+    }
+  }
+
+  // Save Settings
+  const saveSettings = async () => {
+    try {
+      await fetch('http://localhost:8000/settings', {
