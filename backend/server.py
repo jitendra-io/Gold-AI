@@ -918,3 +918,23 @@ async def websocket_endpoint(websocket: WebSocket):
         formatted_history = [{"role": "user" if msg["role"] == "user" else "ai", "content": msg["content"]} for msg in history]
         await websocket.send_json({"type": "history", "messages": formatted_history})
 
+    # Real-time stats push every 2s
+    async def stats_loop():
+        while True:
+            try:
+                await websocket.send_json(get_system_stats())
+                await asyncio.sleep(2)
+            except Exception:
+                break
+
+    stats_task = asyncio.create_task(stats_loop())
+
+    try:
+        while True:
+            raw_data = await websocket.receive_text()
+            data = json.loads(raw_data)
+            msg_type = data.get("type", "chat")
+            content = data.get("content", "")
+
+            if msg_type == "chat" or msg_type == "voice_text":
+                await websocket.send_json({"type": "status", "content": "⚡ Processing..."})
