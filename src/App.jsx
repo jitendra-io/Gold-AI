@@ -1606,3 +1606,19 @@ export default function App() {
                         fontSize: '0.65rem',
                         fontFamily: 'Orbitron, sans-serif',
                         letterSpacing: 1,
+                        cursor: checkingUpdate ? 'wait' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4
+                      }}
+                    >
+                      <RefreshCw size={11} className={checkingUpdate ? 'spin-anim' : ''} />
+                      {checkingUpdate ? 'CHECKING...' : 'CHECK FOR UPDATES'}
+                    </button>
+                  </div>
+
+                  {updateAvailable && (
+                    <button
+                      onClick={() => openUpdateUrl(updateAvailable.url)}
+                      style={{
+                        width: '100%',
