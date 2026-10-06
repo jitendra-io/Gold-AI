@@ -938,3 +938,23 @@ async def websocket_endpoint(websocket: WebSocket):
 
             if msg_type == "chat" or msg_type == "voice_text":
                 await websocket.send_json({"type": "status", "content": "⚡ Processing..."})
+                response = await get_ai_response(content, websocket)
+                await websocket.send_json({"type": "status", "content": ""})
+                await websocket.send_json({"role": "ai", "content": response})
+                asyncio.create_task(play_and_stream_audio(response, websocket))
+
+            elif msg_type == "voice_interrupt":
+                stop_tts_event.set()
+                try:
+                    pygame.mixer.music.stop()
+                except Exception:
+                    pass
+
+            elif msg_type == "screenshot":
+                await websocket.send_json({"type": "status", "content": "📷 Capturing screen..."})
+                save_message("user", "Analyze my desktop screen")
+                analysis = await analyze_screen()
+                save_message("assistant", analysis)
+                await websocket.send_json({"type": "status", "content": ""})
+                await websocket.send_json({"role": "ai", "content": analysis})
+                asyncio.create_task(play_and_stream_audio(analysis, websocket))
