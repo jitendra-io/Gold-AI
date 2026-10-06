@@ -958,3 +958,23 @@ async def websocket_endpoint(websocket: WebSocket):
                 await websocket.send_json({"type": "status", "content": ""})
                 await websocket.send_json({"role": "ai", "content": analysis})
                 asyncio.create_task(play_and_stream_audio(analysis, websocket))
+
+            elif msg_type == "camera_frame":
+                # User sent snapshot from live webcam
+                await websocket.send_json({"type": "status", "content": "👁️ Analyzing webcam feed..."})
+                save_message("user", "Analyze camera view")
+                img_data_url = data.get("image", "")
+                if "," in img_data_url:
+                    img_data_url = img_data_url.split(",", 1)[1]
+                img_bytes = base64.b64decode(img_data_url)
+                analysis = await analyze_webcam_frame(img_bytes)
+                save_message("assistant", analysis)
+                await websocket.send_json({"type": "status", "content": ""})
+                await websocket.send_json({"role": "ai", "content": analysis})
+                asyncio.create_task(play_and_stream_audio(analysis, websocket))
+
+            elif msg_type == "screen_frame":
+                # User shared a window or tab screen capture from browser
+                await websocket.send_json({"type": "status", "content": "🖥️ Analyzing screen capture..."})
+                save_message("user", "Analyze selected window or display")
+                img_data_url = data.get("image", "")
