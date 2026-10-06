@@ -416,3 +416,178 @@ body {
   background: rgba(0,5,12,0.8);
   border: 1px solid var(--border-orange);
   border-radius: 20px;
+  padding: 0.4rem 1.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  color: var(--neon-orange);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ─── RIGHT COLUMN ─── */
+.right-col {
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.chat-tab-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 0.5rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-bottom: 2px solid transparent;
+}
+
+.chat-tab-btn.active-blue {
+  color: var(--neon-blue);
+  text-shadow: 0 0 8px var(--neon-blue);
+  border-bottom-color: var(--neon-blue);
+}
+
+.chat-tab-btn.active-orange {
+  color: var(--neon-orange);
+  text-shadow: 0 0 8px var(--neon-orange);
+  border-bottom-color: var(--neon-orange);
+}
+
+.messages-area {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem;
+}
+
+.msg-ai {
+  align-self: flex-start;
+  background: rgba(0,243,255,0.05);
+  border: 1px solid rgba(0,243,255,0.15);
+  border-radius: 0 8px 8px 8px;
+  padding: 0.6rem 0.9rem;
+  max-width: 90%;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.msg-user {
+  align-self: flex-end;
+  background: rgba(255,79,0,0.08);
+  border: 1px solid rgba(255,79,0,0.2);
+  border-radius: 8px 0 8px 8px;
+  padding: 0.6rem 0.9rem;
+  max-width: 90%;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #ffd4bc;
+}
+
+.chat-input-row {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-top: 1px solid var(--border-blue);
+  background: rgba(0,0,0,0.3);
+}
+
+.chat-input {
+  flex: 1;
+  background: rgba(0,5,12,0.8);
+  border: 1px solid var(--border-blue);
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  color: var(--text-main);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.chat-input:focus {
+  border-color: var(--neon-blue);
+  box-shadow: 0 0 15px rgba(0,243,255,0.2);
+}
+
+.send-btn {
+  background: linear-gradient(135deg, rgba(0,243,255,0.2), rgba(0,243,255,0.05));
+  border: 1px solid var(--neon-blue);
+  color: var(--neon-blue);
+  border-radius: 20px;
+  padding: 0.5rem 1.2rem;
+  cursor: pointer;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+}
+
+.send-btn:hover {
+  background: rgba(0,243,255,0.2);
+  box-shadow: 0 0 20px rgba(0,243,255,0.4);
+  text-shadow: 0 0 8px var(--neon-blue);
+}
+
+/* ─── GRID LINES BACKGROUND ─── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0, 243, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 243, 255, 0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── HEXAGON BADGE & WANG AVATAR ─── */
+.hex-badge {
+  width: 36px;
+  height: 36px;
+  background: var(--neon-blue-dim);
+  border: 1px solid var(--neon-blue);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--neon-blue);
+  box-shadow: 0 0 20px rgba(0,243,255,0.3);
+}
+
+.wang-brand-avatar-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  padding: 2px;
+  background: linear-gradient(135deg, rgba(0, 243, 255, 0.9), rgba(255, 255, 255, 0.5), rgba(0, 160, 255, 0.7));
+  box-shadow: 0 0 15px rgba(0, 243, 255, 0.5), 0 0 30px rgba(0, 243, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.wang-brand-avatar-wrap:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 25px rgba(0, 243, 255, 0.8), 0 0 45px rgba(255, 255, 255, 0.4);
+}
+
+.wang-brand-avatar {
