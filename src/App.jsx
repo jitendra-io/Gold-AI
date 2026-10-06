@@ -1338,3 +1338,70 @@ export default function App() {
                               cursor: 'pointer',
                               padding: 2,
                               opacity: 0.7,
+                              transition: 'opacity 0.2s',
+                              display: 'flex',
+                              alignItems: 'center'
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+                            onMouseLeave={e => e.currentTarget.style.opacity = '0.7'}
+                            title="Copy response to clipboard"
+                          >
+                            {copiedMsgIndex === i ? <Check size={12} /> : <Copy size={12} />}
+                          </button>
+                        )}
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                  <div ref={messagesEndRef} />
+                </div>
+
+                {/* Quick Action Chips */}
+                <div style={{ display: 'flex', gap: '0.4rem', padding: '0.4rem 0.75rem', overflowX: 'auto', borderTop: '1px solid rgba(0,243,255,0.1)' }}>
+                  <button
+                    onClick={() => handleSend("What is visible on my computer screen right now?")}
+                    style={{ background: 'rgba(0,243,255,0.06)', border: '1px solid rgba(0,243,255,0.2)', color: 'var(--neon-blue)', padding: '3px 8px', borderRadius: '12px', fontSize: '0.6rem', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                  >
+                    📷 Screen Analysis
+                  </button>
+                  <button
+                    onClick={() => handleSend("What are the latest breakthroughs in AI technology?")}
+                    style={{ background: 'rgba(0,243,255,0.06)', border: '1px solid rgba(0,243,255,0.2)', color: 'var(--neon-blue)', padding: '3px 8px', borderRadius: '12px', fontSize: '0.6rem', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                  >
+                    🔍 AI News
+                  </button>
+                  <button
+                    onClick={() => handleSend("Open YouTube in my browser")}
+                    style={{ background: 'rgba(0,243,255,0.06)', border: '1px solid rgba(0,243,255,0.2)', color: 'var(--neon-blue)', padding: '3px 8px', borderRadius: '12px', fontSize: '0.6rem', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                  >
+                    🌐 YouTube
+                  </button>
+                </div>
+
+                <div className="chat-input-row">
+                  <input
+                    id="chat-input"
+                    className="chat-input"
+                    value={inputValue}
+                    onChange={e => setInputValue(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleSend()}
+                    placeholder="Enter command or speak..."
+                  />
+                  <button id="send-btn" className="send-btn" onClick={() => handleSend()}>
+                    <Send size={14} />
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* Content: Notes View */}
+            {activeTab === 'notes' && (
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', padding: '0.5rem 0.75rem', borderBottom: '1px solid rgba(255,79,0,0.2)', background: 'rgba(255,79,0,0.03)', alignItems: 'center' }}>
+                  <button
+                    onClick={copyNotesToClipboard}
+                    style={{ background: 'rgba(255,79,0,0.1)', border: '1px solid var(--border-orange)', color: 'var(--neon-orange)', padding: '3px 8px', borderRadius: 4, fontSize: '0.65rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                  >
+                    {copiedNotes ? <Check size={11} /> : <Copy size={11} />}
+                    {copiedNotes ? 'COPIED' : 'COPY'}
+                  </button>
+                  <button
