@@ -1656,3 +1656,20 @@ export default function App() {
                       fontSize: '0.65rem',
                       fontFamily: 'Orbitron, sans-serif',
                       letterSpacing: 1,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    RESET CONVERSATION MEMORY
+                  </button>
+                </div>
+
+              </div>
+            )}
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  )
+}
