@@ -1539,3 +1539,36 @@ export default function App() {
                       fontFamily: 'Orbitron, sans-serif',
                       fontSize: '0.7rem',
                       letterSpacing: 2,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 6
+                    }}
+                  >
+                    {settingsSaved ? <Check size={14} /> : <Sparkles size={14} />}
+                    {settingsSaved ? 'SETTINGS UPDATED' : 'APPLY SETTINGS'}
+                  </button>
+
+                  <button
+                    onClick={testVoiceSample}
+                    style={{
+                      background: 'rgba(0,243,255,0.1)',
+                      border: '1px solid var(--border-blue)',
+                      color: 'var(--neon-blue)',
+                      padding: '0.6rem 0.8rem',
+                      borderRadius: 4,
+                      cursor: 'pointer',
+                      fontFamily: 'Orbitron, sans-serif',
+                      fontSize: '0.65rem',
+                      letterSpacing: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 4
+                    }}
+                    title="Play voice preview"
+                  >
+                    <Volume2 size={13} /> TEST
+                  </button>
+                </div>
+
+                {/* AI Models Overview */}
